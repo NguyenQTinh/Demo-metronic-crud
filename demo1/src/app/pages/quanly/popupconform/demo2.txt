@@ -1,0 +1,252 @@
+const EMPTY_SERVICE_GROUP: ServiceGroup = {
+  id: undefined,
+  name: '',
+  maxDayStorage: null,
+  clServiceOptionDtos: [],
+  note: '',
+  active: true,
+};
+
+@Component({
+  selector: 'app-edit-service-group-modal',
+  templateUrl: './edit-service-group-modal.component.html',
+  styleUrls: ['./edit-service-group-modal.component.scss'],
+  providers: [
+    { provide: NgbDateAdapter, useClass: CustomAdapter },
+    { provide: NgbDateParserFormatter, useClass: CustomDateParserFormatter }
+  ]
+})
+export class EditServiceGroupModalComponent implements OnInit, OnDestroy {
+  @Input() id: string;
+  isLoading$;
+  serviceGroup: ServiceGroup;
+  formGroup: FormGroup;
+  serviceOptionDtosMap = {
+    p480: '480p',
+    p720: '720p',
+    p1080: '1080p',
+    p2160: '2K',
+    p4320: '4K',
+  };
+
+  private subscriptions: Subscription[] = [];
+  constructor(
+    public serviceGroupService: ServiceGroupService,
+    private fb: FormBuilder, public modal: NgbActiveModal,
+    private toastService: ToastService,
+    private authService: AuthService
+  ) { }
+
+  ngOnInit(): void {
+    this.isLoading$ = this.serviceGroupService.isLoading$;
+    this.loadCustomer();
+  }
+
+  loadCustomer() {
+    if (!this.id) {
+      this.serviceGroup = EMPTY_SERVICE_GROUP;
+      this.loadForm();
+    } else {
+      const sb = this.serviceGroupService.getItemById(this.id)
+        .subscribe(response => {
+          this.serviceGroup = response.data;
+          this.loadForm();
+        });
+      this.subscriptions.push(sb);
+    }
+  }
+
+  loadForm() {
+    this.formGroup = this.fb.group({
+      name: [
+        { value: this.serviceGroup.name, disabled: !this.hasUpdatePermission() },
+        Validators.compose([
+          Validators.required,
+          whiteSpaceValidator,
+          Validators.maxLength(255)
+        ])
+      ],
+      maxDayStorage: [
+        { value: this.serviceGroup.maxDayStorage, disabled: !this.hasUpdatePermission() },
+        Validators.required
+      ],
+      ...this.mapServiceOptionDtosField(),
+      active: [
+        { value: this.serviceGroup.active, disabled: !this.hasUpdatePermission() },
+        Validators.required
+      ],
+      note: [
+        { value: this.serviceGroup.note, disabled: !this.hasUpdatePermission() },
+        Validators.maxLength(4000)
+      ],
+    });
+  }
+
+  private mapServiceOptionDtosField() {
+    const mapFields = {};
+
+    Object.keys(this.serviceOptionDtosMap).forEach((key) => {
+      const price = (this.serviceGroup.clServiceOptionDtos
+        .find(x => x.resolution === this.serviceOptionDtosMap[key])?.price || '')
+        .toLocaleString('de-DE', { minimumFractionDigits: 0 });
+
+      return mapFields[key] = [
+        { value: price, disabled: !this.hasUpdatePermission() },
+        Validators.compose([
+          Validators.required,
+          minMoneyLength(3),
+          maxMoneyLength(12)
+        ])
+      ];
+    });
+
+    return mapFields;
+  }
+
+  save() {
+    const serviceGroup = this.prepareForm();
+    if (this.serviceGroup.id) {
+      this.edit(serviceGroup);
+    } else {
+      this.create(serviceGroup);
+    }
+  }
+
+  edit(serviceGroup: ServiceGroup) {
+    const sbUpdate = this.serviceGroupService.update(serviceGroup)
+      .subscribe(response => {
+        if (response.errorCode === SERVER_CODES.SUCCESS) {
+          this.modal.close();
+          return this.showSuccess();
+        }
+
+        this.handleError(response?.errorCode);
+      });
+    this.subscriptions.push(sbUpdate);
+  }
+
+  create(serviceGroup: ServiceGroup) {
+    const sbCreate = this.serviceGroupService.create(serviceGroup)
+      .subscribe(response => {
+        if (response.errorCode === SERVER_CODES.SUCCESS) {
+          this.modal.close();
+          return this.showSuccess();
+        }
+
+        this.handleError(response?.errorCode);
+      });
+
+    this.subscriptions.push(sbCreate);
+  }
+
+  private showSuccess() {
+    this.toastService.show({
+      type: 'success',
+      title: ${this.id ? 'Cập nhật' : 'Thêm mới'} thành công!,
+    });
+  }
+
+  private handleError(code: number) {
+    switch (code) {
+      case SERVER_CODES.SERVICE_GROUP_NAME_AND_DAY_EXISTED:
+        this.formGroup.controls.name.setErrors({ existed: true });
+        this.formGroup.controls.maxDayStorage.setErrors({ existed: true });
+        break;
+      case SERVER_CODES.SERVICE_GROUP_NAME_EXISTED:
+        this.formGroup.controls.name.setErrors({ existed: true });
+        break;
+      case SERVER_CODES.SERVICE_GROUP_DAY_EXISTED:
+        this.formGroup.controls.maxDayStorage.setErrors({ existed: true });
+        break;
+      default:
+        this.toastService.show({
+          type: 'error',
+          title: 'Lỗi không xác định từ máy chủ!',
+        });
+        break;
+    }
+  }
+
+  private prepareForm() {
+    const formData = this.formGroup.value;
+    const serviceGroup = {
+      name: formData.name.trim(),
+      maxDayStorage: formData.maxDayStorage,
+      clServiceOptionDtos: this.prepareServiceOptionDtos(formData),
+      note: formData.note.trim(),
+    } as ServiceGroup;
+
+    if (this.id) {
+      serviceGroup.id = this.serviceGroup.id;
+      serviceGroup.active = formData.active;
+    }
+
+    return serviceGroup;
+  }
+
+  private prepareServiceOptionDtos(formData) {
+    Object.keys(this.serviceOptionDtosMap).forEach(k => {
+      const serviceOptionDto = this.serviceGroup.clServiceOptionDtos
+        .find(x => x.resolution === this.serviceOptionDtosMap[k]);
+
+      // tslint:disable-next-line: radix
+      const price = parseInt((formData[k] ?? '').toString().replace(/[^0-9]/g, '')) ?? null;
+
+      if (serviceOptionDto) {
+        serviceOptionDto.price = price;
+      } else {
+        this.serviceGroup.clServiceOptionDtos.push({
+          resolution: this.serviceOptionDtosMap[k],
+          price,
+        });
+      }
+    });
+
+    return this.serviceGroup.clServiceOptionDtos;
+  }
+
+  ngOnDestroy(): void {
+    this.subscriptions.forEach(sb => sb.unsubscribe());
+  }
+
+  // helpers for View
+  isControlValid(controlName: string): boolean {
+    const control = this.formGroup.controls[controlName];
+    return control.valid && (control.dirty || control.touched);
+  }
+
+  isControlInvalid(controlName: string): boolean {
+    const control = this.formGroup.controls[controlName];
+    return control.invalid && (control.dirty || control.touched);
+  }
+
+  controlHasError(validation, controlName): boolean {
+    const control = this.formGroup.controls[controlName];
+    return control.hasError(validation) && (control.dirty || control.touched);
+  }
+
+  isControlTouched(controlName): boolean {
+    const control = this.formGroup.controls[controlName];
+    return control.dirty || control.touched;
+  }
+
+  toggleStatus(event) {
+    const active = event.target.checked ? true : false;
+    this.formGroup.patchValue({ active });
+    this.serviceGroup.active = active;
+  }
+
+  changeMaxStorageDay(event: number) {
+    this.formGroup.controls.maxDayStorage.setValue(event);
+    this.formGroup.controls.maxDayStorage.markAsTouched();
+    this.formGroup.controls.maxDayStorage.markAsDirty();
+  }
+
+  hasUpdatePermission() {
+    const permissions = ['QLNDV_ALL'];
+
+    permissions.push(this.id ? 'QLNDV_UPDATE' : 'QLNDV_CREATE');
+
+    return this.authService.hasAnyPermission(permissions);
+  }
+}

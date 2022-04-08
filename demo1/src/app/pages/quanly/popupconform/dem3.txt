@@ -1,0 +1,133 @@
+<div class="card card-custom gutter-b">
+  <div class="card-header">
+    <div class="card-title">
+      <h3 class="card-label">Quản lý Nhóm dịch vụ</h3>
+    </div>
+    <div class="card-toolbar">
+      <button *appPermission="{ permission: ['QLNDV_ALL', 'QLNDV_CREATE'] }" type="button" class="btn btn-primary"
+        (click)="create()">
+        <i class="icon-sm flaticon2-plus"></i> Thêm mới
+      </button>
+    </div>
+  </div>
+  <div class="card-body">
+    <!-- begin: Filtration form -->
+    <div class="form form-label-right">
+      <div class="form-group row">
+        <div class="col-lg-5">
+          <div class="row" [formGroup]="filterGroup">
+            <div class="col-lg-6">
+              <select class="form-control form-control-solid" placeholder="Số ngày lưu trữ" name="maxDayStorage"
+                formControlName="maxDayStorage">
+                <option value="">Số ngày lưu trữ</option>
+                <option *ngFor="let option of maxStorageDays" [value]="option">{{ option }}</option>
+              </select>
+            </div>
+            <div class="col-lg-6">
+              <select class="form-control form-control-solid" name="active" placeholder="Trạng thái"
+                formControlName="active">
+                <option value="">Trạng thái</option>
+                <option value="true">Kích hoạt</option>
+                <option value="false">Tạm dừng</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-7 input-group" [formGroup]="searchGroup">
+          <div class="input-group-prepend">
+            <span [inlineSVG]="'./assets/media/svg/icons/General/Search.svg'" cacheSVG="false"
+              class="input-group-text svg-icon svg-icon-md border-0">
+            </span>
+          </div>
+          <input type="text" class="form-control form-control-solid" name="searchText"
+            placeholder="Nhập tên nhóm dịch vụ, ghi chú" value="" formControlName="searchTerm" />
+        </div>
+      </div>
+    </div>
+    <!-- end: Filtration form -->
+
+    <!-- begin:Table -->
+    <div class="table-responsive angular-bootstrap-table">
+      <table class="table table-hover table-vertical-center overflow-hidden">
+        <thead>
+          <th class="selection-cell-header" data-row-selection="true">
+          </th>
+          <!-- <th>
+            ID
+          </th> -->
+          <th class="min-width-150">
+            Tên nhóm dịch vụ
+            <app-sort-icon column="name" [activeColumn]="sorting.column" [activeDirection]="sorting.direction"
+              (sort)="sort($event)"></app-sort-icon>
+          </th>
+          <th class="min-width-150">
+            Số ngày lưu trữ
+            <app-sort-icon column="maxDayStorage" [activeColumn]="sorting.column" [activeDirection]="sorting.direction"
+              (sort)="sort($event)"></app-sort-icon>
+          </th>
+          <th class="min-width-100">
+            Giá tiền (VND)
+          </th>
+          <th class="min-width-100">
+            Ghi chú
+            <app-sort-icon column="note" [activeColumn]="sorting.column" [activeDirection]="sorting.direction"
+              (sort)="sort($event)"></app-sort-icon>
+          </th>
+          <th class="min-width-100">
+            Trạng thái
+            <app-sort-icon column="active" [activeColumn]="sorting.column" [activeDirection]="sorting.direction"
+              (sort)="sort($event)"></app-sort-icon>
+          </th>
+        </thead>
+        <tbody>
+          <tr *ngFor="let serviceGroup of serviceGroupService.items$ | async; let i = index">
+            <td class="text-center">
+              <div ngbDropdown class="d-inline-block" container="body">
+                <button class="btn" id="dropdownActions" ngbDropdownToggle><i
+                    class="ki ki-bold-more-ver icon-md"></i></button>
+                <div ngbDropdownMenu aria-labelledby="dropdownActions">
+                  <button *appPermission="{ permission: ['QLNDV_ALL', 'QLNDV_DELETE'] }" ngbDropdownItem
+                    (click)="delete(serviceGroup)">Xóa</button>
+                </div>
+              </div>
+            </td>
+            <!-- <td>{{ i + (paginator.page - 1) * paginator.pageSize + 1 }}</td> -->
+            <td>
+              <a href="javascript:void(0)" class="text-no-underline" (click)="edit(serviceGroup.id, $event)">
+                <span class="overflow" title="{{ serviceGroup.name }}">
+                  {{ serviceGroup.name }}
+                </span>
+              </a>
+            </td>
+            <td>
+              <span class="overflow" title="{{ serviceGroup.maxDayStorage }}">
+                {{ serviceGroup.maxDayStorage }}
+              </span>
+            </td>
+            <td [title]="getClServiceOptionDtosString(serviceGroup.clServiceOptionDtos)">
+                <p *ngFor="let p of serviceGroup.clServiceOptionDtos">
+                  {{ p.resolution }} : {{ p.price | number: '1.0-0': 'de-DE' }}
+                </p>
+            </td>
+            <td>
+              <span class="overflow" title="{{ serviceGroup.note }}">
+                {{ serviceGroup.note }}
+              </span>
+            </td>
+            <td>
+              <span *ngIf="serviceGroup.active" class="badge badge-light-success overflow" title="Kích hoạt">Kích
+                hoạt</span>
+              <span *ngIf="!serviceGroup.active" class="badge badge-secondary overflow" title="Tạm dừng">Tạm dừng</span>
+            </td>
+          </tr>
+          <tr *ngIf="(serviceGroupService.items$ | async)?.length < 1">
+            <td class="text-center" colspan="12">Không có dữ liệu</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <!-- end: Table -->
+    <app-paginator class="d-flex justify-content-between align-items-center flex-wrap" [paginator]="paginator"
+      [isLoading]="isLoading" (paginate)="paginate($event)"></app-paginator>
+  </div>
+</div>

@@ -1,0 +1,214 @@
+<div class="modal-content">
+  <div class="modal-header">
+    <div class="modal-title" id="example-modal-sizes-title-lg">
+      <ng-container *ngIf="serviceGroup">
+        <ng-container *ngIf="serviceGroup.id">Cập nhật</ng-container>
+        <ng-container *ngIf="!serviceGroup.id">Thêm mới</ng-container>
+        Nhóm dịch vụ
+      </ng-container>
+    </div>
+    <button type="button" class="close" aria-label="Close" (click)="modal.dismiss()">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+
+
+  <div class="overlay overlay-block cursor-default modal-body">
+    <ng-container *ngIf="isLoading$ | async">
+      <div class="overlay-layer bg-transparent">
+        <div class="spinner spinner-lg spinner-success"></div>
+      </div>
+    </ng-container>
+
+    <ng-container *ngIf="serviceGroup">
+      <form action="#" class="form form-label-right" [formGroup]="formGroup">
+        <div class="form-group row">
+          <div class="col-12">
+            <label class="form-label">Tên nhóm dịch vụ<span class="text-danger">*</span></label>
+            <input type="text" class="form-control form-control-solid form-control-lg" name="name"
+              placeholder="Tên nhóm dịch vụ" autocomplete="off" [class.is-invalid]="isControlInvalid('name')"
+              [class.is-valid]="isControlValid('name')" formControlName="name" />
+            <div class="invalid-feedback"
+              *ngIf="controlHasError('required', 'name') || controlHasError('whitespace', 'name')">
+              Đây là trường bắt buộc!
+            </div>
+            <div class="invalid-feedback" *ngIf="controlHasError('existed', 'name')">
+              Tên nhóm dịch vụ đã tồn tại!
+            </div>
+            <div class="invalid-feedback" *ngIf="controlHasError('maxlength', 'name')">
+              Tối đa 255 ký tự!
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group row">
+          <div class="col-12">
+            <label class="form-label">Số ngày lưu trữ<span class="text-danger">*</span></label>
+            <app-select-box [items]="serviceGroupService.getAllMaxStorageDays() | async"
+              [disabled]="!hasUpdatePermission()" placeholder="Số ngày lưu trữ" name="maxDayStorage"
+              [isInvalid]="isControlInvalid('maxDayStorage')" [isValid]="isControlValid('maxDayStorage')"
+              [value]="formGroup.controls['maxDayStorage'].value" (valueChange)="changeMaxStorageDay($event)"
+              (touched)="formGroup.controls['maxDayStorage'].markAsTouched()">
+            </app-select-box>
+            <div class="invalid-feedback d-block" *ngIf="controlHasError('required', 'maxDayStorage')">
+              Đây là trường bắt buộc!
+            </div>
+            <div class="invalid-feedback d-block" *ngIf="controlHasError('existed', 'maxDayStorage')">
+              Số ngày lưu trữ đã tồn tại!
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group row">
+          <div class="col-12">
+            <div class="row">
+              <div class="col-4">
+                <label>Độ phân giải</label>
+                <input type="text" class="form-control form-control-solid form-control-lg" value="480p" readonly>
+              </div>
+              <div class="col-8">
+                <label>Giá tiền (VND)<span class="text-danger">*</span></label>
+                <input currencyMask type="text" class="form-control form-control-solid form-control-lg" name="p480"
+                  placeholder="Giá tiền (VND)" autocomplete="off" [class.is-invalid]="isControlInvalid('p480')"
+                  [class.is-valid]="isControlValid('p480')" formControlName="p480" />
+                <div class="invalid-feedback" *ngIf="controlHasError('required', 'p480')">
+                  Đây là trường bắt buộc!
+                </div>
+                <div class="invalid-feedback" *ngIf="controlHasError('minmoneylength', 'p480')">
+                  Tối thiểu 3 chữ số!
+                </div>
+                <div class="invalid-feedback" *ngIf="controlHasError('maxmoneylength', 'p480')">
+                  Tối đa 12 chữ số!
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group row">
+              <div class="col-4">
+                <label>Độ phân giải</label>
+                <input type="text" class="form-control form-control-solid form-control-lg" value="720p" readonly>
+              </div>
+              <div class="col-8">
+                <label>Giá tiền (VND)<span class="text-danger">*</span></label>
+                <input currencyMask type="text" class="form-control form-control-solid form-control-lg" name="p720"
+                  placeholder="Giá tiền (VND)" autocomplete="off" [class.is-invalid]="isControlInvalid('p720')"
+                  [class.is-valid]="isControlValid('p720')" formControlName="p720" />
+                <div class="invalid-feedback" *ngIf="controlHasError('required', 'p720')">
+                  Đây là trường bắt buộc!
+                </div>
+                <div class="invalid-feedback" *ngIf="controlHasError('minmoneylength', 'p720')">
+                  Tối thiểu 3 chữ số!
+                </div>
+                <div class="invalid-feedback" *ngIf="controlHasError('maxmoneylength', 'p720')">
+                  Tối đa 12 chữ số!
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group row">
+              <div class="col-4">
+                <label>Độ phân giải</label>
+                <input type="text" class="form-control form-control-solid form-control-lg" value="1080p" readonly>
+              </div>
+              <div class="col-8">
+                <label>Giá tiền (VND)<span class="text-danger">*</span></label>
+                <input currencyMask type="text" class="form-control form-control-solid form-control-lg" name="p1080"
+                  placeholder="Giá tiền (VND)" autocomplete="off" [class.is-invalid]="isControlInvalid('p1080')"
+                  [class.is-valid]="isControlValid('p1080')" formControlName="p1080" />
+                <div class="invalid-feedback" *ngIf="controlHasError('required', 'p1080')">
+                  Đây là trường bắt buộc!
+                </div>
+                <div class="invalid-feedback" *ngIf="controlHasError('minmoneylength', 'p1080')">
+                  Tối thiểu 3 chữ số!
+                </div>
+                <div class="invalid-feedback" *ngIf="controlHasError('maxmoneylength', 'p1080')">
+                  Tối đa 12 chữ số!
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group row">
+              <div class="col-4">
+                <label>Độ phân giải</label>
+                <input type="text" class="form-control form-control-solid form-control-lg" value="2K" readonly>
+              </div>
+              <div class="col-8">
+                <label>Giá tiền (VND)<span class="text-danger">*</span></label>
+                <input currencyMask type="text" class="form-control form-control-solid form-control-lg" name="p2160"
+                  placeholder="Giá tiền (VND)" autocomplete="off" [class.is-invalid]="isControlInvalid('p2160')"
+                  [class.is-valid]="isControlValid('p2160')" formControlName="p2160" />
+                <div class="invalid-feedback" *ngIf="controlHasError('required', 'p2160')">
+                  Đây là trường bắt buộc!
+                </div>
+                <div class="invalid-feedback" *ngIf="controlHasError('minmoneylength', 'p2160')">
+                  Tối thiểu 3 chữ số!
+                </div>
+                <div class="invalid-feedback" *ngIf="controlHasError('maxmoneylength', 'p2160')">
+                  Tối đa 12 chữ số!
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group row">
+              <div class="col-4">
+                <label>Độ phân giải</label>
+                <input type="text" class="form-control form-control-solid form-control-lg" value="4K" readonly>
+              </div>
+              <div class="col-8">
+                <label>Giá tiền (VND)<span class="text-danger">*</span></label>
+                <input currencyMask type="text" class="form-control form-control-solid form-control-lg" name="p4320"
+                  placeholder="Giá tiền (VND)" autocomplete="off" [class.is-invalid]="isControlInvalid('p4320')"
+                  [class.is-valid]="isControlValid('p4320')" formControlName="p4320" />
+                <div class="invalid-feedback" *ngIf="controlHasError('required', 'p4320')">
+                  Đây là trường bắt buộc!
+                </div>
+                <div class="invalid-feedback" *ngIf="controlHasError('minmoneylength', 'p4320')">
+                  Tối thiểu 3 chữ số!
+                </div>
+                <div class="invalid-feedback" *ngIf="controlHasError('maxmoneylength', 'p4320')">
+                  Tối đa 12 chữ số!
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group row" *ngIf="serviceGroup?.id">
+          <div class="col-12">
+            <label class="form-label">Trạng thái</label>
+            <span class="switch switch-outline switch-icon switch-success">
+              <label>
+                <input [disabled]="!hasUpdatePermission()" type="checkbox" name="active"
+                  [checked]="serviceGroup?.active ? 'checked' : ''" (change)="toggleStatus($event)" /><span></span>
+              </label>
+            </span>
+          </div>
+        </div>
+
+        <div class="form-group row">
+          <div class="col-12">
+            <label class="form-label">Ghi chú</label>
+            <textarea type="text" class="form-control form-control-solid form-control-lg overflow-hidden" name="note"
+              placeholder="Ghi chú" autocomplete="off" [class.is-invalid]="isControlInvalid('note')"
+              [class.is-valid]="isControlValid('note')" formControlName="note">
+            </textarea>
+            <div class="invalid-feedback" *ngIf="controlHasError('maxlength', 'note')">
+              Tối đa 4000 ký tự!
+            </div>
+          </div>
+        </div>
+      </form>
+    </ng-container>
+  </div>
+  <div class="modal-footer justify-content-center">
+    <button type="button" ngbAutofocus class="btn btn-light btn-elevate mr-2" (click)="modal.dismiss()">
+      Huỷ
+    </button>
+    <ng-container *ngIf="serviceGroup">
+      <button type="submit" class="btn btn-primary btn-elevate" (click)="save()"
+        [disabled]="formGroup.invalid || !hasUpdatePermission()">
+        Lưu
+      </button>
+    </ng-container>
+  </div>
+</div>
