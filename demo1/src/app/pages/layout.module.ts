@@ -21,6 +21,13 @@ import { CoreModule } from '../_metronic/core';
 import { SubheaderModule } from '../_metronic/partials/layout/subheader/subheader.module';
 import { AsideDynamicComponent } from './_layout/components/aside-dynamic/aside-dynamic.component';
 import { HeaderMenuDynamicComponent } from './_layout/components/header/header-menu-dynamic/header-menu-dynamic.component';
+import { QuanlyComponent } from './quanly/quanly.component';
+import { CreateUdateComponent } from './quanly/create-udate/create-udate.component';
+import {ReactiveFormsModule} from "@angular/forms";
+import {MatIconModule} from "@angular/material/icon";
+import {MatSlideToggleModule} from "@angular/material/slide-toggle";
+import { PopupconformComponent } from './quanly/popupconform/popupconform.component';
+import {CRUDTableModule} from "../_metronic/shared/crud-table";
 
 @NgModule({
   declarations: [
@@ -35,17 +42,24 @@ import { HeaderMenuDynamicComponent } from './_layout/components/header/header-m
     LanguageSelectorComponent,
     AsideDynamicComponent,
     HeaderMenuDynamicComponent,
+    QuanlyComponent,
+    CreateUdateComponent,
+    PopupconformComponent,
   ],
-  imports: [
-    CommonModule,
-    PagesRoutingModule,
-    TranslationModule,
-    InlineSVGModule,
-    ExtrasModule,
-    NgbDropdownModule,
-    NgbProgressbarModule,
-    CoreModule,
-    SubheaderModule,
-  ],
+    imports: [
+        CommonModule,
+        PagesRoutingModule,
+        TranslationModule,
+        InlineSVGModule,
+        ExtrasModule,
+        NgbDropdownModule,
+        NgbProgressbarModule,
+        CoreModule,
+        SubheaderModule,
+        ReactiveFormsModule,
+        MatIconModule,
+        MatSlideToggleModule,
+        CRUDTableModule,
+    ],
 })
 export class LayoutModule { }

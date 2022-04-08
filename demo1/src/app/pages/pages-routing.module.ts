@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import { LayoutComponent } from './_layout/layout.component';
+import {QuanlyComponent} from './quanly/quanly.component';
 
 const routes: Routes = [
   {
@@ -60,8 +61,13 @@ const routes: Routes = [
           ),
       },
       {
+        path: 'quanly',
+        component: QuanlyComponent,
+      },
+      {
         path: '',
-        redirectTo: '/dashboard',
+        // path: '',  // tức ko có gì thì trỏ đến QuanLyComponent
+        redirectTo: 'quanly',
         pathMatch: 'full',
       },
       {

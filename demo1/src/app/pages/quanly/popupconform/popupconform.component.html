@@ -1,0 +1,18 @@
+<div>
+    <div class="modal-body">
+        <div class="text-center">
+            <mat-icon [ngClass]="['mat-icon', iconType.class]">{{iconType.icon}}</mat-icon>
+            <p class="message break-word"  [innerHTML]='innerSetting.title'></p>
+            <p class="mb-0 break-word" [innerHTML]='innerSetting.message'></p>
+        </div>
+    </div>
+
+    <div class="modal-footer justify-content-center">
+        <button type="button" class="btn btn-light btn-elevate mr-1" (click)="modal.dismiss()">
+            {{innerSetting.buttonCancel}}
+        </button>&nbsp;
+        <button type="button" class="btn btn-primary btn-elevate" (click)="onButtonOK()" *ngIf = "innerSetting.type =='question' || innerSetting.type =='dangerquestion'">
+            {{innerSetting.buttonOK}}
+        </button>
+    </div>
+</div>

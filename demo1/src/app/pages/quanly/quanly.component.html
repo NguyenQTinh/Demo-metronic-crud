@@ -1,0 +1,86 @@
+<div class="card card-custom gutter-b">
+    <div class="card-header">
+        <div class="card-title">
+            <h3 class="dft-header-title">Quản lý Nhóm dịch vụ</h3>
+        </div>
+        <div class="card-toolbar">
+            <button type="button" class="btn btn-primary" (click)="create()">
+                <i class="fa fa-plus icon-sm"></i> Thêm mới
+            </button>
+        </div>
+    </div>
+    <div class="card-body">
+        <!-- begin: Filtration form -->
+        <div class="form form-label-right">
+            <div class="form-group dft-form-control row">
+                <div class="col-3" >
+                    <select class="form-control" placeholder="Số ngày lưu trữ">
+                        <option value="">Số ngày lưu trữ</option>
+                        <!--                        <option *ngFor="let item of clAlarmTypes" [value]="item">{{convertClAlarmType(item)}}</option>-->
+                    </select>
+                </div>
+
+                <div class="col-3">
+                    <select class="form-control" placeholder="Trạng thái">
+                        <option value="">Trạng thái</option>
+                        <!--                        <option *ngFor="let item of clAlarmTypes" [value]="item">{{convertClAlarmType(item)}}</option>-->
+                    </select>
+                </div>
+
+
+                <div class="col-6 input-container" >
+                    <span [inlineSVG]="'./assets/media/svg/icons/General/Search.svg'" cacheSVG="false"
+                          class="input-icon svg-icon svg-icon-2x border-0">
+                    </span>
+                    <input type="text" class="form-control dft-form-control"
+                           placeholder="Nhập tên nhóm dịch vụ, ghi chú" value=""/>
+                </div>
+            </div>
+        </div>
+        <!-- end: Filtration form -->
+
+        <!-- begin:Table -->
+        <div class="table-responsive angular-bootstrap-table">
+            <table class="table table-head-custom table-vertical-center overflow-hidden">
+                <thead class="dft-table-header">
+                <th><!-- action --></th>
+                <th class="c-1">TÊN NHÓM DỊCH VỤ</th>
+                <th class="c-1">SỐ NGÀY LƯU TRỮ</th>
+                <th class="c-1">GIÁ TIỀN (VND)</th>
+                <th class="c-1">GHI CHÚ</th>
+                <th class="c-1">TRẠNG THÁI</th>
+                </thead>
+                <tbody class="dft-table-content">
+<!--                <tr *ngFor="let ql of manageService.items$ | async">-->
+                <tr *ngFor="let ql of quanLy">
+                    <td class="ct-w-5">
+                        <div ngbDropdown class="d-inline-block dft-form-control" container="body">
+                            <button class="btn" id="dropdownActions" ngbDropdownToggle>
+                                <mat-icon>more_vert</mat-icon>
+                            </button>
+                            <div ngbDropdownMenu aria-labelledby="dropdownActions">
+                                <button ngbDropdownItem (click)="delete(ql.id, ql.maxDayStorage)">Xóa</button>
+<!--                                <button ngbDropdownItem (click)="delete(ql.id)">Xóa</button>-->
+                            </div>
+                        </div>
+                    </td>
+                    <td class="ct-w-15">{{ ql.name }}</td>
+                    <td class="ct-w-15">{{ ql.maxDayStorage }}</td>
+                    <td class="ct-w-15" >
+                        <p *ngFor="let serviceOption of ql.clServiceOptionDtos">{{serviceOption.resolution}}: {{serviceOption.price}}</p>
+                    </td>
+                    <td class="ct-w-15">{{ ql.note }}</td>
+                    <td class="ct-w-15">{{ ql.active }}</td>
+                </tr>
+<!--                <tr>-->
+<!--                    <td colspan="9" class="text-center">Không có dữ liệu</td>-->
+<!--                </tr>-->
+                </tbody>
+            </table>
+        </div>
+        <!-- end: Table -->
+        <app-paginator class="d-flex justify-content-between align-items-center flex-wrap" [paginator]="paginator"
+                       [isLoading]="isLoading" (paginate)="paginate($event)"></app-paginator>
+
+    </div>
+</div>

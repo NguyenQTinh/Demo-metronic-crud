@@ -1,0 +1,168 @@
+<div class="modal-content">
+    <!-- start modal header -->
+    <div class="modal-header">
+        <div class="modal-title h4 dft-title-popup w-100 d-flex justify-content-between"
+             id="example-modal-sizes-title-lg">
+<!--            <ng-container *ngIf="ql">-->
+<!--                &lt;!&ndash;                <ng-container *ngIf="ql.id">Cập nhật</ng-container>&ndash;&gt;-->
+<!--                <ng-container>Cập nhật</ng-container>-->
+<!--                <ng-container *ngIf="!ql.id">Thêm mới</ng-container>-->
+<!--                Nhóm dịch vụ-->
+<!--            </ng-container>-->
+            <ng-container>
+                Thêm mới Nhóm dịch vụ
+            </ng-container>
+        </div>
+        <div class="modal-title">
+            <mat-icon class="btn-close" (click)="closeModal()">close</mat-icon>
+        </div>
+    </div>
+
+    <!-- Form   -->
+    <div class="overlay overlay-block cursor-default modal-body">
+        <!--        <ng-container *ngIf="isLoading$ | async">-->
+        <!--            <div class="overlay-layer bg-transparent">-->
+        <!--                <div class="spinner spinner-lg spinner-success"></div>-->
+        <!--            </div>-->
+        <!--        </ng-container>-->
+
+        <!--        <ng-container *ngIf="ql">-->
+        <ng-container>
+            <form action="#" [formGroup]="formGroup" (ngSubmit)="submitForm()" *ngIf="formGroup">
+                <ng-container class="row">
+                    <div class="form-group row">
+                        <div class="col-12">
+                            <label class="form-label">Tên nhóm dịch vụ <span style="color: red;">*</span></label>
+                            <input type="text" class="form-control form-control-lg form-control-sm form-control-solid"
+                                   formControlName="name"/>
+                        </div>
+                    </div>
+
+                    <div class="form-group row form-control form-control-lg form-control-sm form-control-solid">
+                        <select class="col-12" formControlName="maxDayStorage">
+                            <option class="form-label" value="" >Số ngày lưu trữ<span class="text-danger">*</span></option>
+                            <option *ngFor="let day of maxDayS"
+                                    [value]="day.maxDayStorage">{{ day.maxDayStorage }}</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group row">
+                        <div class="col-12">
+                            <div class="row">
+                                <div class="col-4">
+                                    <label>Độ phân giải</label>
+                                    <input type="text" class="form-control form-control-solid form-control-lg"
+                                           value="480p" readonly>
+                                </div>
+                                <div class="col-8">
+                                    <label>Giá tiền (VND)<span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control form-control-solid form-control-lg"
+                                           name="p480"
+                                           placeholder="Giá tiền (VND)"/>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <div class="row">
+                                <div class="col-4">
+                                    <label>Độ phân giải</label>
+                                    <input type="text" class="form-control form-control-solid form-control-lg"
+                                           value="720p" readonly>
+                                </div>
+                                <div class="col-8">
+                                    <label>Giá tiền (VND)<span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control form-control-solid form-control-lg"
+                                           name="p480"
+                                           placeholder="Giá tiền (VND)"/>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <div class="row">
+                                <div class="col-4">
+                                    <label>Độ phân giải</label>
+                                    <input type="text" class="form-control form-control-solid form-control-lg"
+                                           value="1080p" readonly>
+                                </div>
+                                <div class="col-8">
+                                    <label>Giá tiền (VND)<span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control form-control-solid form-control-lg"
+                                           name="1080p"
+                                           placeholder="Giá tiền (VND)"/>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <div class="row">
+                                <div class="col-4">
+                                    <label>Độ phân giải</label>
+                                    <input type="text" class="form-control form-control-solid form-control-lg"
+                                           value="2K" readonly>
+                                </div>
+                                <div class="col-8">
+                                    <label>Giá tiền (VND)<span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control form-control-solid form-control-lg"
+                                           name="p480"
+                                           placeholder="Giá tiền (VND)"/>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <div class="row">
+                                <div class="col-4">
+                                    <label>Độ phân giải</label>
+                                    <input type="text" class="form-control form-control-solid form-control-lg"
+                                           value="4K" readonly>
+                                </div>
+                                <div class="col-8">
+                                    <label>Giá tiền (VND)<span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control form-control-solid form-control-lg"
+                                           name="p480"
+                                           placeholder="Giá tiền (VND)"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-xl-12 ">Trạng thái</div>
+                    <div class="form-group col-xl-12 ">
+                        <mat-slide-toggle formControlName="active">
+                            {{formGroup.get('active').value === true ? 'Kích hoạt' : 'Hủy kích hoạt'}}
+                        </mat-slide-toggle>
+                    </div>
+
+                    <div class="form-group row">
+                        <div class="col-12">
+                            <label class="form-label">Ghi chú</label>
+                            <textarea type="text"
+                                      class="form-control form-control-solid form-control-lg overflow-hidden"
+                                      name="note"
+                                      placeholder="Ghi chú"
+                                      formControlName="note">
+                            </textarea>
+                        </div>
+                    </div>
+                </ng-container>
+
+                <div class="modal-footer dft-form-control justify-content-center">
+                    <button
+                            type="button"
+                            class="btn btn-light btn-elevate mr-2"
+                            (click)="modal.dismiss()"
+                    >
+                        Huỷ
+                    </button>
+                    <ng-container>
+                        <button (click)="save()" type="submit" class="btn btn-primary btn-elevate">Lưu</button>
+                    </ng-container>
+                </div>
+            </form>
+        </ng-container>
+    </div>
+
+
+</div>

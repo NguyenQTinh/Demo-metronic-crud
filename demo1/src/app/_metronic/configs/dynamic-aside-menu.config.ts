@@ -387,5 +387,12 @@ export const DynamicAsideMenuConfig = {
         },
       ]
     },
+    {
+      title: 'Quan Ly',
+      root: true,
+      icon: 'flaticon2-expand',
+      page: '/quanly',
+      svg: './assets/media/svg/icons/Home/Library.svg'
+    },
   ]
 };

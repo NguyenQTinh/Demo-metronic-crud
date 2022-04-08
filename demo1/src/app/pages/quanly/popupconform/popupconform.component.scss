@@ -1,0 +1,26 @@
+.image-content {
+  height: 76px;
+  width: 85px;
+  margin-bottom: 16px;
+}
+.message{
+  font-size: 14px;
+  font-weight: bold;
+}
+.break-word {
+  overflow-wrap: break-word;
+}
+
+.mat-icon {
+  font-size: 120px !important;
+  width: auto !important;
+}
+.icon-danger {
+  color: #F64E60;
+}
+.icon-warning {
+  color: #d9e712;
+}
+.icon-info, .icon-primary {
+  color: #187DE4;
+}
