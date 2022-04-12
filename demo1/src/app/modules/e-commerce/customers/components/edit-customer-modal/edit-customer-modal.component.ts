@@ -51,10 +51,11 @@ export class EditCustomerModalComponent implements OnInit, OnDestroy {
   loadCustomer() {
     if (!this.id) {
       this.customer = EMPTY_CUSTOMER;
-      this.loadForm();
+      this.loadForm(); // nếu ko có ID sẽ xuống màn này để tạo mới
     } else {
       const sb = this.customersService.getItemById(this.id).pipe(
-        first(),
+        first(),  // chỉ phát ra giá trị đầu tiên do nguồn có thể quan sát được
+          // (hoặc giá trị đầu tiên đáp ứng một số điều kiện =>ở đây là id)
         catchError((errorMessage) => {
           this.modal.dismiss(errorMessage);
           return of(EMPTY_CUSTOMER);
@@ -81,7 +82,8 @@ export class EditCustomerModalComponent implements OnInit, OnDestroy {
   }
 
   save() {
-    this.prepareCustomer();
+    this.prepareCustomer(); // có này nó mới hiển thị được giá trị
+    // this.loadForm();
     if (this.customer.id) {
       this.edit();
     } else {
@@ -117,6 +119,7 @@ export class EditCustomerModalComponent implements OnInit, OnDestroy {
 
   private prepareCustomer() {
     const formData = this.formGroup.value;
+    console.log('prepareCustomer', formData);
     this.customer.dob = new Date(formData.dob);
     this.customer.email = formData.email;
     this.customer.firstName = formData.firstName;
