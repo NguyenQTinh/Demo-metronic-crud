@@ -28,6 +28,7 @@ import {MatIconModule} from "@angular/material/icon";
 import {MatSlideToggleModule} from "@angular/material/slide-toggle";
 import { PopupconformComponent } from './quanly/popupconform/popupconform.component';
 import {CRUDTableModule} from "../_metronic/shared/crud-table";
+import {MatTooltipModule} from "@angular/material/tooltip";
 
 @NgModule({
   declarations: [
@@ -60,6 +61,7 @@ import {CRUDTableModule} from "../_metronic/shared/crud-table";
         MatIconModule,
         MatSlideToggleModule,
         CRUDTableModule,
+        MatTooltipModule,
     ],
 })
 export class LayoutModule { }

@@ -78,7 +78,7 @@ export abstract class TableService<T> {
 
   API_URL = 'http://123.30.214.139:17104/api/mange/group-service';
 
-  token = 'eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJzeXNhZG1pbkB0aGluZ3Nib2FyZC5vcmciLCJzY29wZXMiOlsiU1lTX0FETUlOIl0sInVzZXJJZCI6ImRkOWM5ZmMwLTU3NjctMTFlYy1hMTQxLWExZjM4MTFhMjQ2ZCIsImZpcnN0TmFtZSI6IiIsImxhc3ROYW1lIjoiU1lTVEVNIEFETUlOIiwiZW5hYmxlZCI6dHJ1ZSwiaXNQdWJsaWMiOmZhbHNlLCJ0ZW5hbnRJZCI6IjEzODE0MDAwLTFkZDItMTFiMi04MDgwLTgwODA4MDgwODA4MCIsImN1c3RvbWVySWQiOiIxMzgxNDAwMC0xZGQyLTExYjItODA4MC04MDgwODA4MDgwODAiLCJpc3MiOiJ0aGluZ3Nib2FyZC5pbyIsImlhdCI6MTY0OTMxNDMxMSwiZXhwIjoxNjQ5MzIzMzExfQ.a6rv8x0bSX-j-FfckbkRzetHqpg45rtCjYWlN2lkjxWoxpJwN-g3DODwiq8W4mjOxuhHLs2-PS3eEEWkp3MBQw';
+  token = 'eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJzeXNhZG1pbkB0aGluZ3Nib2FyZC5vcmciLCJzY29wZXMiOlsiU1lTX0FETUlOIl0sInVzZXJJZCI6ImRkOWM5ZmMwLTU3NjctMTFlYy1hMTQxLWExZjM4MTFhMjQ2ZCIsImZpcnN0TmFtZSI6IiIsImxhc3ROYW1lIjoiU1lTVEVNIEFETUlOIiwiZW5hYmxlZCI6dHJ1ZSwiaXNQdWJsaWMiOmZhbHNlLCJ0ZW5hbnRJZCI6IjEzODE0MDAwLTFkZDItMTFiMi04MDgwLTgwODA4MDgwODA4MCIsImN1c3RvbWVySWQiOiIxMzgxNDAwMC0xZGQyLTExYjItODA4MC04MDgwODA4MDgwODAiLCJpc3MiOiJ0aGluZ3Nib2FyZC5pbyIsImlhdCI6MTY0OTc0OTk4NiwiZXhwIjoxNjQ5NzU4OTg2fQ.X3-mdxpkSmtSHL7Gbq9yRyJOdD-5OBbnslb1Pl74Ezpb0tYMybT8niTzmvyqu53d3HPjtlfDwgjajZ-Xp7pKzw';
 
   constructor(http: HttpClient) {
     this.http = http;
@@ -111,9 +111,12 @@ export abstract class TableService<T> {
   }
 
   createOrUpdate(item: BaseModel): Observable<BaseModel> {
+    let headers = new HttpHeaders();
+    headers = headers.set('Authorization', `Bearer ${this.token}`);
+
     this._isLoading$.next(true);
     // this._errorMessage.next('');
-    return this.http.post<BaseModel>(this.API_URL, item).pipe(
+    return this.http.post<BaseModel>(this.API_URL, item, {headers}).pipe(
         catchError(err => {
           // map err về chung 1 dạng TbErrorResp, error nào k rõ => UNKNOWN_ERROR
           // this._errorMessage.next(err);
@@ -129,9 +132,12 @@ export abstract class TableService<T> {
   // CREATE
   // server should return the object with ID
   create(item: BaseModel): Observable<BaseModel> {
+    let headers = new HttpHeaders();
+    headers = headers.set('Authorization', `Bearer ${this.token}`);
+
     this._isLoading$.next(true);
     // this._errorMessage.next('');
-    return this.http.post<BaseModel>(this.API_URL, item).pipe(
+    return this.http.post<BaseModel>(this.API_URL, item, {headers}).pipe(
         catchError(err => {
           // this._errorMessage.next(err);
           console.error('CREATE ITEM', err);
@@ -158,10 +164,13 @@ export abstract class TableService<T> {
   }
 
   getItemById(id: any): Observable<BaseModel> {
+    let headers = new HttpHeaders();
+    headers = headers.set('Authorization', `Bearer ${this.token}`);
+
     this._isLoading$.next(true);
     // this._errorMessage.next('');
     const url = `${this.API_URL}/${id}`;
-    return this.http.get<BaseModel>(url).pipe(
+    return this.http.get<BaseModel>(url, {headers}).pipe(
         catchError(err => {
           // this._errorMessage.next(err);
           console.error('GET ITEM BY IT', id, err);
@@ -173,10 +182,13 @@ export abstract class TableService<T> {
 
   // UPDATE
   update(item: BaseModel): Observable<any> {
+    let headers = new HttpHeaders();
+    headers = headers.set('Authorization', `Bearer ${this.token}`);
+
     const url = `${this.API_URL}/${item.id}`;
     this._isLoading$.next(true);
     // this._errorMessage.next('');
-    return this.http.put(url, item).pipe(
+    return this.http.put(url, item, {headers}).pipe(
         catchError(err => {
           // this._errorMessage.next(err);
           console.error('UPDATE ITEM', item, err);

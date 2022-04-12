@@ -13,10 +13,11 @@
         <!-- begin: Filtration form -->
         <div class="form form-label-right">
             <div class="form-group dft-form-control row">
-                <div class="col-3" >
+                <div class="col-3">
                     <select class="form-control" placeholder="Số ngày lưu trữ">
                         <option value="">Số ngày lưu trữ</option>
-                        <!--                        <option *ngFor="let item of clAlarmTypes" [value]="item">{{convertClAlarmType(item)}}</option>-->
+                        <option *ngFor="let item of allDays"
+                                [value]="item.maxDayStorage">{{item.maxDayStorage}}</option>
                     </select>
                 </div>
 
@@ -28,12 +29,14 @@
                 </div>
 
 
-                <div class="col-6 input-container" >
+                <div class="col-6 input-container" [formGroup]="searchGroup">
                     <span [inlineSVG]="'./assets/media/svg/icons/General/Search.svg'" cacheSVG="false"
                           class="input-icon svg-icon svg-icon-2x border-0">
                     </span>
                     <input type="text" class="form-control dft-form-control"
-                           placeholder="Nhập tên nhóm dịch vụ, ghi chú" value=""/>
+                           placeholder="Nhập tên nhóm dịch vụ, ghi chú" value=""
+                           formControlName="searchTerm"
+                    />
                 </div>
             </div>
         </div>
@@ -51,8 +54,7 @@
                 <th class="c-1">TRẠNG THÁI</th>
                 </thead>
                 <tbody class="dft-table-content">
-<!--                <tr *ngFor="let ql of manageService.items$ | async">-->
-                <tr *ngFor="let ql of quanLy">
+                <tr *ngFor="let ql of manageService.items$ | async">
                     <td class="ct-w-5">
                         <div ngbDropdown class="d-inline-block dft-form-control" container="body">
                             <button class="btn" id="dropdownActions" ngbDropdownToggle>
@@ -60,21 +62,26 @@
                             </button>
                             <div ngbDropdownMenu aria-labelledby="dropdownActions">
                                 <button ngbDropdownItem (click)="delete(ql.id, ql.maxDayStorage)">Xóa</button>
-<!--                                <button ngbDropdownItem (click)="delete(ql.id)">Xóa</button>-->
                             </div>
                         </div>
                     </td>
-                    <td class="ct-w-15">{{ ql.name }}</td>
+                    <td (click)="edit(ql.id)" class="ct-w-15">
+                        <a class="content-link two-lines-ellipse" [matTooltip]="ql.name" matTooltipPosition="above">
+                            {{ ql.name }}
+                        </a>
+                    </td>
+                    <!--                    <td class="ct-w-15">{{ ql.name }}</td>-->
                     <td class="ct-w-15">{{ ql.maxDayStorage }}</td>
-                    <td class="ct-w-15" >
-                        <p *ngFor="let serviceOption of ql.clServiceOptionDtos">{{serviceOption.resolution}}: {{serviceOption.price}}</p>
+                    <td class="ct-w-15">
+                        <p *ngFor="let serviceOption of ql.clServiceOptionDtos">{{serviceOption.resolution}}
+                            : {{serviceOption.price}}</p>
                     </td>
                     <td class="ct-w-15">{{ ql.note }}</td>
                     <td class="ct-w-15">{{ ql.active }}</td>
                 </tr>
-<!--                <tr>-->
-<!--                    <td colspan="9" class="text-center">Không có dữ liệu</td>-->
-<!--                </tr>-->
+                <!--                <tr>-->
+                <!--                    <td colspan="9" class="text-center">Không có dữ liệu</td>-->
+                <!--                </tr>-->
                 </tbody>
             </table>
         </div>

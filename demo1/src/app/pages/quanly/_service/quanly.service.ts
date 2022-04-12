@@ -2,7 +2,7 @@ import {Injectable, OnDestroy} from '@angular/core';
 import {ITableState, TableResponseModel, TableService} from '../../../_metronic/shared/crud-table';
 import {QuanlyModel} from '../_model/quanly.model';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
-import {Observable} from 'rxjs';
+import {Observable, of} from 'rxjs';
 import {PageData} from '../_model/page-data.model';
 import {catchError, map} from 'rxjs/operators';
 
@@ -21,7 +21,7 @@ export class QuanlyService extends TableService<QuanlyModel> implements OnDestro
         super(http);
     }
 
-    token = 'eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJzeXNhZG1pbkB0aGluZ3Nib2FyZC5vcmciLCJzY29wZXMiOlsiU1lTX0FETUlOIl0sInVzZXJJZCI6ImRkOWM5ZmMwLTU3NjctMTFlYy1hMTQxLWExZjM4MTFhMjQ2ZCIsImZpcnN0TmFtZSI6IiIsImxhc3ROYW1lIjoiU1lTVEVNIEFETUlOIiwiZW5hYmxlZCI6dHJ1ZSwiaXNQdWJsaWMiOmZhbHNlLCJ0ZW5hbnRJZCI6IjEzODE0MDAwLTFkZDItMTFiMi04MDgwLTgwODA4MDgwODA4MCIsImN1c3RvbWVySWQiOiIxMzgxNDAwMC0xZGQyLTExYjItODA4MC04MDgwODA4MDgwODAiLCJpc3MiOiJ0aGluZ3Nib2FyZC5pbyIsImlhdCI6MTY0OTcyNzg3NiwiZXhwIjoxNjQ5NzM2ODc2fQ.i6Yqfmk2idpT09VUZcwYKdKlUtAT4r5t3ZCZxtpOj3EDqMUNTYG7mDqsy04vutEl_afZLtzH6l8k_Ccc7ZO4cA';
+    token = 'eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJzeXNhZG1pbkB0aGluZ3Nib2FyZC5vcmciLCJzY29wZXMiOlsiU1lTX0FETUlOIl0sInVzZXJJZCI6ImRkOWM5ZmMwLTU3NjctMTFlYy1hMTQxLWExZjM4MTFhMjQ2ZCIsImZpcnN0TmFtZSI6IiIsImxhc3ROYW1lIjoiU1lTVEVNIEFETUlOIiwiZW5hYmxlZCI6dHJ1ZSwiaXNQdWJsaWMiOmZhbHNlLCJ0ZW5hbnRJZCI6IjEzODE0MDAwLTFkZDItMTFiMi04MDgwLTgwODA4MDgwODA4MCIsImN1c3RvbWVySWQiOiIxMzgxNDAwMC0xZGQyLTExYjItODA4MC04MDgwODA4MDgwODAiLCJpc3MiOiJ0aGluZ3Nib2FyZC5pbyIsImlhdCI6MTY0OTc0OTk4NiwiZXhwIjoxNjQ5NzU4OTg2fQ.X3-mdxpkSmtSHL7Gbq9yRyJOdD-5OBbnslb1Pl74Ezpb0tYMybT8niTzmvyqu53d3HPjtlfDwgjajZ-Xp7pKzw';
 
     apiCommon = 'http://123.30.214.139:17104/api/mange/group-service';
 
@@ -43,6 +43,27 @@ export class QuanlyService extends TableService<QuanlyModel> implements OnDestro
             catchError(err => {
                 console.error('ERROR', err);
                 return err;
+            })
+        );
+    }
+
+    // custom find
+    find(tableState: ITableState): Observable<TableResponseModel<QuanlyModel>> {
+        let headers = new HttpHeaders();
+        headers = headers.set('Authorization', `Bearer ${this.token}`);
+
+        const url = `${this.API_URL}${this.getQuery(tableState)}`;
+        return this.http.get<any>(url, {headers}).pipe(
+            map( (res) => {
+                const result: TableResponseModel<QuanlyModel> = {
+                    items: res.data,
+                    total: res.totalElements
+                };
+                return result;
+            }),
+            catchError(err => {
+                console.error('FIND ITEMS', err);
+                return of({items: [], total: 0});
             })
         );
     }

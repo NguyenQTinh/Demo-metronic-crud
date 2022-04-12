@@ -3,10 +3,10 @@ import {FormBuilder, FormGroup} from '@angular/forms';
 import {NgbModal} from '@ng-bootstrap/ng-bootstrap';
 import {CreateUdateComponent} from './create-udate/create-udate.component';
 import {QuanlyService} from './_service/quanly.service';
-import {Subscription} from 'rxjs';
+import {of, Subscription} from 'rxjs';
 import {QuanlyModel} from './_model/quanly.model';
 import {GroupingState, PaginatorState, SortState} from '../../_metronic/shared/crud-table';
-import {debounceTime, distinctUntilChanged} from 'rxjs/operators';
+import {catchError, debounceTime, distinctUntilChanged, tap} from 'rxjs/operators';
 import {PopupconformComponent} from './popupconform/popupconform.component';
 
 @Component({
@@ -15,6 +15,13 @@ import {PopupconformComponent} from './popupconform/popupconform.component';
     styleUrls: ['./quanly.component.scss']
 })
 export class QuanlyComponent implements OnInit, OnDestroy {
+
+    constructor(
+        private fb: FormBuilder,
+        private modalService: NgbModal,
+        public manageService: QuanlyService,
+    ) {
+    }
 
     quanLy: QuanlyModel[] = [];
     private subscriptions: Subscription[] = [];
@@ -25,38 +32,38 @@ export class QuanlyComponent implements OnInit, OnDestroy {
     isLoading: boolean;
     filterGroup: FormGroup;
     searchGroup: FormGroup;
-    constructor(
-        private fb: FormBuilder,
-        private modalService: NgbModal,
-        public manageService: QuanlyService,
-    ) {
-    }
+
+    allDays: any[];
 
     ngOnInit(): void {
-        this.loadData();
 
-        // this.manageService.dftFetch();  // load dữ liệu
+        this.manageService.fetch();  // load dữ liệu
         // this.manageService.items$.subscribe(res => console.log(res));
         this.grouping = this.manageService.grouping;
         this.paginator = this.manageService.paginator;
         this.sorting = this.manageService.sorting;
         const sb = this.manageService.isLoading$.subscribe(res => this.isLoading = res);
         this.subscriptions.push(sb);
-    }
 
-    loadData() {
-        const sb = this.manageService.getAll().subscribe(data => {
-            console.log(data);
-            this.quanLy = data;
-        }, error => {
-            this.manageService.handleError(error); // log error
-        });
-        this.subscriptions.push(sb);
+        this.getMaxDaysStorage();
+        this.searchForm();
     }
-
 
     create() {
-        this.modalService.open(CreateUdateComponent, {size: 'lg'}); // open popup
+        // this.modalService.open(CreateUdateComponent, {size: 'lg'}); // open popup
+        this.edit(undefined);
+    }
+
+    edit(id: number) {
+        const modalRef = this.modalService.open(CreateUdateComponent, {size: 'lg'});
+        modalRef.componentInstance.id = id;
+        modalRef.result.then(
+            () => {
+                this.manageService.fetch();
+            },
+            () => {
+            }
+        );
     }
 
     delete(id: string, name: string) {
@@ -69,10 +76,15 @@ export class QuanlyComponent implements OnInit, OnDestroy {
         modalRef.result.then(
             (rs) => {
                 // on close : Call API to delete the record here
-                this.manageService.deleteManage(id).subscribe((res: any) => {
-                    alert('Xóa thành công!');
-                    this.loadData();
-                });
+                this.manageService.deleteManage(id).subscribe(
+                    (res: any) => {
+                        alert('Xóa thành công!'); // sau khi xóa được sẽ update lại bảng
+                        this.manageService.fetch();  // load dữ liệu
+                    },
+                    error => {
+                        alert('Xóa ko thành công, do đã được sử dụng');
+                    }
+                );
             },
             (rs) => {
                 // on dismiss
@@ -98,10 +110,6 @@ export class QuanlyComponent implements OnInit, OnDestroy {
         });
         const searchEvent = this.searchGroup.controls.searchTerm.valueChanges
             .pipe(
-                /*
-              The user can type quite quickly in the input box, and that could trigger a lot of server requests. With this operator,
-              we are limiting the amount of server requests emitted to a maximum of one every 150ms
-              */
                 debounceTime(150),
                 distinctUntilChanged()
             )
@@ -120,5 +128,18 @@ export class QuanlyComponent implements OnInit, OnDestroy {
 
     ngOnDestroy(): void {
         this.subscriptions.forEach((sb) => sb.unsubscribe());
+    }
+
+    getMaxDaysStorage() {
+        const sbGetMaxDay = this.manageService.getAllMaxDayStorage().subscribe({
+            next: (data) => {
+                console.log(data);
+                this.allDays = data;
+            },
+            error: (err) => {
+                this.manageService.handleError(err); // log error
+            }
+        });
+        this.subscriptions.push(sbGetMaxDay);
     }
 }
