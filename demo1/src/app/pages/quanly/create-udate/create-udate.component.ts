@@ -113,16 +113,16 @@ export class CreateUdateComponent implements OnInit, OnDestroy {
 
     save() {
         this.prepareReqData();
-        this.createOrUpdate();
-        // if (this.ql.id) {
-        //     this.edit();
-        // } else {
-        //     this.create();
-        // }
+        // this.createOrUpdate();
+        if (this.ql.id) {
+            this.edit();
+        } else {
+            this.create();
+        }
     }
 
     edit() {
-        const sbUpdate = this.mangeService.update(this.ql).pipe(
+        const sbUpdate = this.mangeService.updateManage(this.id).pipe(
             tap(() => {
                 alert(this.id + 'Cập nhật thành công');
                 this.modal.close();
@@ -131,12 +131,14 @@ export class CreateUdateComponent implements OnInit, OnDestroy {
                 this.modal.dismiss(errorMessage);
                 return of(this.ql);
             }),
-        ).subscribe(res => this.ql = res);
+        ).subscribe((res) => {
+            this.ql = res;
+        });
         this.subscriptions.push(sbUpdate);
     }
 
     create() {
-        const sbCreate = this.mangeService.create(this.ql).pipe(
+        const sbCreate = this.mangeService.creatManage(this.id).pipe(
             tap(() => {
                 alert(this.id + 'Thêm mới thành công');
                 this.modal.close();
