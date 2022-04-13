@@ -6,6 +6,7 @@ import {of, Subscription} from 'rxjs';
 import {QuanlyService} from '../_service/quanly.service';
 import {catchError, first, tap} from 'rxjs/operators';
 import {TbErrorCode, TbErrorResp} from '../_model/listErrorCode';
+import {Customer} from '../../../modules/e-commerce/_models/customer.model';
 
 
 const EMPTY_ALARM: QuanlyModel = {
@@ -113,11 +114,46 @@ export class CreateUdateComponent implements OnInit, OnDestroy {
     save() {
         this.prepareReqData();
         this.createOrUpdate();
+        // if (this.ql.id) {
+        //     this.edit();
+        // } else {
+        //     this.create();
+        // }
+    }
+
+    edit() {
+        const sbUpdate = this.mangeService.update(this.ql).pipe(
+            tap(() => {
+                alert(this.id + 'Cập nhật thành công');
+                this.modal.close();
+            }),
+            catchError((errorMessage) => {
+                this.modal.dismiss(errorMessage);
+                return of(this.ql);
+            }),
+        ).subscribe(res => this.ql = res);
+        this.subscriptions.push(sbUpdate);
+    }
+
+    create() {
+        const sbCreate = this.mangeService.create(this.ql).pipe(
+            tap(() => {
+                alert(this.id + 'Thêm mới thành công');
+                this.modal.close();
+            }),
+            catchError((errorMessage) => {
+                this.modal.dismiss(errorMessage);
+                return of(this.mangeService);
+            }),
+        ).subscribe((res: QuanlyModel) => this.ql = res);
+        this.subscriptions.push(sbCreate);
     }
 
     private prepareReqData() {
         const formData = this.formGroup.value;
         console.log('formData: ' + formData);
+        console.log(typeof formData.maxDayStorage);
+        console.log(typeof formData.clServiceOptionDtos);
         this.ql = {
             id: this.id,
             name: formData.name,
