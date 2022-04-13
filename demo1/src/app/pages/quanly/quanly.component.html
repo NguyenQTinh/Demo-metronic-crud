@@ -12,21 +12,54 @@
     <div class="card-body">
         <!-- begin: Filtration form -->
         <div class="form form-label-right">
-            <div class="form-group dft-form-control row">
-                <div class="col-3">
-                    <select class="form-control" placeholder="Số ngày lưu trữ">
-                        <option value="">Số ngày lưu trữ</option>
-                        <option *ngFor="let item of allDays"
-                                [value]="item.maxDayStorage">{{item.maxDayStorage}}</option>
-                    </select>
-                </div>
+<!--            <div class="form-group dft-form-control row">-->
+<!--                <ng-container [formGroup]="filterGroup">-->
+<!--                    <div class="col-3">-->
+<!--                        <select class="form-control" placeholder="Số ngày lưu trữ" formControlName="days">-->
+<!--                            <option value="">Số ngày lưu trữ</option>-->
+<!--                            <option *ngFor="let item of allDays"-->
+<!--                                    [value]="item.maxDayStorage">{{item.maxDayStorage}}</option>-->
+<!--                        </select>-->
+<!--                    </div>-->
 
-                <div class="col-3">
-                    <select class="form-control" placeholder="Trạng thái">
-                        <option value="">Trạng thái</option>
-                        <!--                        <option *ngFor="let item of clAlarmTypes" [value]="item">{{convertClAlarmType(item)}}</option>-->
-                    </select>
-                </div>
+<!--                    <div class="col-3">-->
+<!--                        <select class="form-control" placeholder="Trạng thái" formControlName="status">-->
+<!--                            <option value="">Trạng thái</option>-->
+<!--                            <option value="1">Kích Hoạt</option>-->
+<!--                            <option value="2">Hủy Kích Hoạt</option>-->
+<!--                            &lt;!&ndash;                        <option *ngFor="let item of clAlarmTypes" [value]="item">{{convertClAlarmType(item)}}</option>&ndash;&gt;-->
+<!--                        </select>-->
+<!--                    </div>-->
+<!--                </ng-container>-->
+
+
+<!--                <div class="col-6 input-container" [formGroup]="searchGroup">-->
+<!--                    <span [inlineSVG]="'./assets/media/svg/icons/General/Search.svg'" cacheSVG="false"-->
+<!--                          class="input-icon svg-icon svg-icon-2x border-0">-->
+<!--                    </span>-->
+<!--                    <input type="text" class="form-control dft-form-control"-->
+<!--                           placeholder="Nhập tên nhóm dịch vụ, ghi chú" value=""-->
+<!--                           formControlName="searchTerm"-->
+<!--                    />-->
+<!--                </div>-->
+<!--            </div>-->
+                <div class="form-group dft-form-control row">
+                    <div class="col-3">
+                        <select class="form-control" placeholder="Số ngày lưu trữ">
+                            <option value="">Số ngày lưu trữ</option>
+                            <option *ngFor="let item of allDays"
+                                    [value]="item.maxDayStorage">{{item.maxDayStorage}}</option>
+                        </select>
+                    </div>
+
+                    <div class="col-3">
+                        <select class="form-control" placeholder="Trạng thái">
+                            <option value="">Trạng thái</option>
+                            <option value="1">Kích Hoạt</option>
+                            <option value="2">Hủy Kích Hoạt</option>
+                            <!--                        <option *ngFor="let item of clAlarmTypes" [value]="item">{{convertClAlarmType(item)}}</option>-->
+                        </select>
+                    </div>
 
 
                 <div class="col-6 input-container" [formGroup]="searchGroup">
@@ -70,7 +103,6 @@
                             {{ ql.name }}
                         </a>
                     </td>
-                    <!--                    <td class="ct-w-15">{{ ql.name }}</td>-->
                     <td class="ct-w-15">{{ ql.maxDayStorage }}</td>
                     <td class="ct-w-15">
                         <p *ngFor="let serviceOption of ql.clServiceOptionDtos">{{serviceOption.resolution}}

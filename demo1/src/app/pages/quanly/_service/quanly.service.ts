@@ -21,7 +21,7 @@ export class QuanlyService extends TableService<QuanlyModel> implements OnDestro
         super(http);
     }
 
-    token = 'eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJzeXNhZG1pbkB0aGluZ3Nib2FyZC5vcmciLCJzY29wZXMiOlsiU1lTX0FETUlOIl0sInVzZXJJZCI6ImRkOWM5ZmMwLTU3NjctMTFlYy1hMTQxLWExZjM4MTFhMjQ2ZCIsImZpcnN0TmFtZSI6IiIsImxhc3ROYW1lIjoiU1lTVEVNIEFETUlOIiwiZW5hYmxlZCI6dHJ1ZSwiaXNQdWJsaWMiOmZhbHNlLCJ0ZW5hbnRJZCI6IjEzODE0MDAwLTFkZDItMTFiMi04MDgwLTgwODA4MDgwODA4MCIsImN1c3RvbWVySWQiOiIxMzgxNDAwMC0xZGQyLTExYjItODA4MC04MDgwODA4MDgwODAiLCJpc3MiOiJ0aGluZ3Nib2FyZC5pbyIsImlhdCI6MTY0OTc0OTk4NiwiZXhwIjoxNjQ5NzU4OTg2fQ.X3-mdxpkSmtSHL7Gbq9yRyJOdD-5OBbnslb1Pl74Ezpb0tYMybT8niTzmvyqu53d3HPjtlfDwgjajZ-Xp7pKzw';
+    token = 'eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJzeXNhZG1pbkB0aGluZ3Nib2FyZC5vcmciLCJzY29wZXMiOlsiU1lTX0FETUlOIl0sInVzZXJJZCI6ImRkOWM5ZmMwLTU3NjctMTFlYy1hMTQxLWExZjM4MTFhMjQ2ZCIsImZpcnN0TmFtZSI6IiIsImxhc3ROYW1lIjoiU1lTVEVNIEFETUlOIiwiZW5hYmxlZCI6dHJ1ZSwiaXNQdWJsaWMiOmZhbHNlLCJ0ZW5hbnRJZCI6IjEzODE0MDAwLTFkZDItMTFiMi04MDgwLTgwODA4MDgwODA4MCIsImN1c3RvbWVySWQiOiIxMzgxNDAwMC0xZGQyLTExYjItODA4MC04MDgwODA4MDgwODAiLCJpc3MiOiJ0aGluZ3Nib2FyZC5pbyIsImlhdCI6MTY0OTgzOTY5MiwiZXhwIjoxNjQ5ODQ4NjkyfQ.ge1QtHqdlJaxpQkEPaz1zo_fKpxllXFp9jNT1wBggEyf-n6y8jxMjCvw0VUzBUwjL0geU1B5R25s_KKh-h-TDw';
 
     apiCommon = 'http://123.30.214.139:17104/api/mange/group-service';
 
@@ -54,7 +54,7 @@ export class QuanlyService extends TableService<QuanlyModel> implements OnDestro
 
         const url = `${this.API_URL}${this.getQuery(tableState)}`;
         return this.http.get<any>(url, {headers}).pipe(
-            map( (res) => {
+            map((res) => {
                 const result: TableResponseModel<QuanlyModel> = {
                     items: res.data,
                     total: res.totalElements
@@ -114,7 +114,7 @@ export class QuanlyService extends TableService<QuanlyModel> implements OnDestro
 
     handleError(err) {
         if (err.error instanceof Error) {
-          console.log(`Client-side error: ${err.error.message}`);
+            console.log(`Client-side error: ${err.error.message}`);
         } else {
             console.log(`Sever-side error: ${err.status} - ${err.error}`);
         }

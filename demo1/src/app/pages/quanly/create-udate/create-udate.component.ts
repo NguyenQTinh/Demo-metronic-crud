@@ -95,12 +95,14 @@ export class CreateUdateComponent implements OnInit, OnDestroy {
 
     // pathDtos và patchValues: dùng cho thằng form clServiceOptionDtos
     patchDtos() {
-        const control = this.formGroup.get('clServiceOptionDtos') as FormArray;
+        // const control = this.formGroup.get('clServiceOptionDtos') as FormArray;
+        const control = (this.formGroup.get('clServiceOptionDtos') as FormArray).controls;
         this.listOptionDtos.forEach(x => {
             // Duyệt qua mảng listOptionDtos, rôi pusg vào mảng clServiceOptionDtos ở FormGroup
             control.push(this.patchValues(x.resolution, x.price));
         });
     }
+
     patchValues(resolution, price) {
         return this.fb.group({
             resolution: [resolution],
@@ -115,6 +117,7 @@ export class CreateUdateComponent implements OnInit, OnDestroy {
 
     private prepareReqData() {
         const formData = this.formGroup.value;
+        console.log('formData: ' + formData);
         this.ql = {
             id: this.id,
             name: formData.name,
@@ -131,15 +134,19 @@ export class CreateUdateComponent implements OnInit, OnDestroy {
                 alert(this.id ? 'Cập nhật thành công' : 'Thêm mới thành công');
                 this.modal.close();
             }),
-            catchError((err: TbErrorResp) => {
-                if (err.errorCode === TbErrorCode.BAD_REQUEST_PARAMS && err.message === 'Mangane Service name already exist') {
-                    alert('Tên thông báo đã tồn tại');
-                } else {
-                    // this.mangeService.handleTbError(err);
-                    alert('Lỗi quá trời lỗi');
-                }
+            // catchError((err: TbErrorResp) => {
+            //     if (err.errorCode === TbErrorCode.BAD_REQUEST_PARAMS && err.message === 'Mangane Service name already exist') {
+            //         alert('Tên thông báo đã tồn tại');
+            //     } else {
+            //         // this.mangeService.handleTbError(err);
+            //         alert('Lỗi quá trời lỗi');
+            //     }
+            //     return of(this.ql);
+            // }
+            catchError( err => {
+                alert('Nhóm Dịch Vụ và Số Ngày Lưu Trữ đã tồn tại' );
                 return of(this.ql);
-            }),
+            })
         ).subscribe(res => this.ql = res);
         this.subscriptions.push(sbCreateUpdate);
     }
@@ -150,16 +157,6 @@ export class CreateUdateComponent implements OnInit, OnDestroy {
 
     ngOnDestroy(): void {
         this.subscriptions.forEach((sb: Subscription) => sb.unsubscribe());
-    }
-
-    isControlInvalid(controlName: string): boolean {
-        const control = this.formGroup.controls[controlName];
-        return control.invalid && (control.dirty || control.touched);
-    }
-
-    isControlValid(controlName: string): boolean {
-        const control = this.formGroup.controls[controlName];
-        return control.valid && (control.dirty || control.touched);
     }
 }
 

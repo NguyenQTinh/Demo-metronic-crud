@@ -49,6 +49,35 @@ export class QuanlyComponent implements OnInit, OnDestroy {
         this.searchForm();
     }
 
+    // filterForm() {
+    //     this.filterGroup = this.fb.group({
+    //         days: [''],
+    //         type: [''],
+    //     });
+    //     this.subscriptions.push(
+    //         this.filterGroup.controls.status.valueChanges.subscribe(() =>
+    //             this.filter()
+    //         )
+    //     );
+    //     this.subscriptions.push(
+    //         this.filterGroup.controls.type.valueChanges.subscribe(() => this.filter())
+    //     );
+    // }
+    //
+    // filter() {
+    //     const filter = {};
+    //     const status = this.filterGroup.get('status').value;
+    //     // if (status) {
+    //     //     filter['status'] = status;
+    //     // }
+    //
+    //     const type = this.filterGroup.get('type').value;
+    //     // if (type) {
+    //     //     filter['type'] = type;
+    //     // }
+    //     this.manageService.patchState({ filter });
+    // }
+
     create() {
         // this.modalService.open(CreateUdateComponent, {size: 'lg'}); // open popup
         this.edit(undefined);

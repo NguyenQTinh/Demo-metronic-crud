@@ -32,8 +32,6 @@
                         <div class="col-12">
                             <label class="form-label">Tên nhóm dịch vụ <span style="color: red;">*</span></label>
                             <input type="text" class="form-control form-control-lg form-control-sm form-control-solid"
-                                   [class.is-invalid]="isControlInvalid('name')"
-                                   [class.is-valid]="isControlValid('name')"
                                    formControlName="name"/>
                         </div>
                     </div>
@@ -47,8 +45,8 @@
                     </div>
 
                     <div class="form-group row" formArrayName="clServiceOptionDtos">
-                        <div class="col-12"
-                             *ngFor="let e of formGroup.get('clServiceOptionDtos').controls, let i=index">
+<!--                        <div class="col-12" *ngFor="let e of formGroup.get('clServiceOptionDtos').controls, let i=index">-->
+                        <div class="col-12" *ngFor="let e of formGroup.get('clServiceOptionDtos')['controls'], let i=index">
                             <div class="row" [formGroupName]="i">
                                 <div class="col-4">
                                     <label>Độ phân giải<span class="text-danger">*</span></label>
