@@ -12,40 +12,10 @@
     <div class="card-body">
         <!-- begin: Filtration form -->
         <div class="form form-label-right">
-<!--            <div class="form-group dft-form-control row">-->
-<!--                <ng-container [formGroup]="filterGroup">-->
-<!--                    <div class="col-3">-->
-<!--                        <select class="form-control" placeholder="Số ngày lưu trữ" formControlName="days">-->
-<!--                            <option value="">Số ngày lưu trữ</option>-->
-<!--                            <option *ngFor="let item of allDays"-->
-<!--                                    [value]="item.maxDayStorage">{{item.maxDayStorage}}</option>-->
-<!--                        </select>-->
-<!--                    </div>-->
-
-<!--                    <div class="col-3">-->
-<!--                        <select class="form-control" placeholder="Trạng thái" formControlName="status">-->
-<!--                            <option value="">Trạng thái</option>-->
-<!--                            <option value="1">Kích Hoạt</option>-->
-<!--                            <option value="2">Hủy Kích Hoạt</option>-->
-<!--                            &lt;!&ndash;                        <option *ngFor="let item of clAlarmTypes" [value]="item">{{convertClAlarmType(item)}}</option>&ndash;&gt;-->
-<!--                        </select>-->
-<!--                    </div>-->
-<!--                </ng-container>-->
-
-
-<!--                <div class="col-6 input-container" [formGroup]="searchGroup">-->
-<!--                    <span [inlineSVG]="'./assets/media/svg/icons/General/Search.svg'" cacheSVG="false"-->
-<!--                          class="input-icon svg-icon svg-icon-2x border-0">-->
-<!--                    </span>-->
-<!--                    <input type="text" class="form-control dft-form-control"-->
-<!--                           placeholder="Nhập tên nhóm dịch vụ, ghi chú" value=""-->
-<!--                           formControlName="searchTerm"-->
-<!--                    />-->
-<!--                </div>-->
-<!--            </div>-->
-                <div class="form-group dft-form-control row">
+            <div class="form-group dft-form-control row">
+                <ng-container [formGroup]="filterGroup">
                     <div class="col-3">
-                        <select class="form-control" placeholder="Số ngày lưu trữ">
+                        <select class="form-control" placeholder="Số ngày lưu trữ" name="days" formControlName="days">
                             <option value="">Số ngày lưu trữ</option>
                             <option *ngFor="let item of allDays"
                                     [value]="item.maxDayStorage">{{item.maxDayStorage}}</option>
@@ -53,13 +23,13 @@
                     </div>
 
                     <div class="col-3">
-                        <select class="form-control" placeholder="Trạng thái">
+                        <select class="form-control" placeholder="Trạng thái" name="active" formControlName="active">
                             <option value="">Trạng thái</option>
-                            <option value="1">Kích Hoạt</option>
-                            <option value="2">Hủy Kích Hoạt</option>
-                            <!--                        <option *ngFor="let item of clAlarmTypes" [value]="item">{{convertClAlarmType(item)}}</option>-->
+                            <option value="true">Kích Hoạt</option>
+                            <option value="false">Hủy Kích Hoạt</option>
                         </select>
                     </div>
+                </ng-container>
 
 
                 <div class="col-6 input-container" [formGroup]="searchGroup">

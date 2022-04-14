@@ -21,7 +21,7 @@ export class QuanlyService extends TableService<QuanlyModel> implements OnDestro
         super(http);
     }
 
-    token = 'eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJzeXNhZG1pbkB0aGluZ3Nib2FyZC5vcmciLCJzY29wZXMiOlsiU1lTX0FETUlOIl0sInVzZXJJZCI6ImRkOWM5ZmMwLTU3NjctMTFlYy1hMTQxLWExZjM4MTFhMjQ2ZCIsImZpcnN0TmFtZSI6IiIsImxhc3ROYW1lIjoiU1lTVEVNIEFETUlOIiwiZW5hYmxlZCI6dHJ1ZSwiaXNQdWJsaWMiOmZhbHNlLCJ0ZW5hbnRJZCI6IjEzODE0MDAwLTFkZDItMTFiMi04MDgwLTgwODA4MDgwODA4MCIsImN1c3RvbWVySWQiOiIxMzgxNDAwMC0xZGQyLTExYjItODA4MC04MDgwODA4MDgwODAiLCJpc3MiOiJ0aGluZ3Nib2FyZC5pbyIsImlhdCI6MTY0OTgzOTY5MiwiZXhwIjoxNjQ5ODQ4NjkyfQ.ge1QtHqdlJaxpQkEPaz1zo_fKpxllXFp9jNT1wBggEyf-n6y8jxMjCvw0VUzBUwjL0geU1B5R25s_KKh-h-TDw';
+    token = 'eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJzeXNhZG1pbkB0aGluZ3Nib2FyZC5vcmciLCJzY29wZXMiOlsiU1lTX0FETUlOIl0sInVzZXJJZCI6ImRkOWM5ZmMwLTU3NjctMTFlYy1hMTQxLWExZjM4MTFhMjQ2ZCIsImZpcnN0TmFtZSI6IiIsImxhc3ROYW1lIjoiU1lTVEVNIEFETUlOIiwiZW5hYmxlZCI6dHJ1ZSwiaXNQdWJsaWMiOmZhbHNlLCJ0ZW5hbnRJZCI6IjEzODE0MDAwLTFkZDItMTFiMi04MDgwLTgwODA4MDgwODA4MCIsImN1c3RvbWVySWQiOiIxMzgxNDAwMC0xZGQyLTExYjItODA4MC04MDgwODA4MDgwODAiLCJpc3MiOiJ0aGluZ3Nib2FyZC5pbyIsImlhdCI6MTY0OTkyMTIyNywiZXhwIjoxNjQ5OTMwMjI3fQ.P3L_W90ivg4Vv42m2CP7LMTttWhZCl95hWyIBxaTgDjS_ph1V1HyyU_1phXLjp2kTEGFGkUShTJYwXcGtlxyow';
 
     apiCommon = 'http://123.30.214.139:17104/api/mange/group-service';
 
@@ -68,18 +68,33 @@ export class QuanlyService extends TableService<QuanlyModel> implements OnDestro
         );
     }
 
-    creatManage(id: any): Observable<QuanlyModel> {
+    // creatManage(id: any): Observable<QuanlyModel> {
+    //     let headers = new HttpHeaders();
+    //     headers = headers.set('Authorization', `Bearer ${this.token}`);
+    //     // @ts-ignore
+    //     return this.http.post<any>(`${this.apiCommon}`, {headers});
+    // }
+
+    creatManage(data: QuanlyModel): Observable<QuanlyModel> {
         let headers = new HttpHeaders();
         headers = headers.set('Authorization', `Bearer ${this.token}`);
         // @ts-ignore
-        return this.http.post<QuanlyModel>(`${this.apiCommon}/${id}`, {headers});
+        // return this.http.post<QuanlyModel>(`${this.apiCommon}`, data, {headers});
+        return this.http.post(`${this.apiCommon}`, data, {headers});
     }
 
-    updateManage(id: any): Observable<QuanlyModel> {
+    // updateManage(id: any): Observable<QuanlyModel> {
+    //     let headers = new HttpHeaders();
+    //     headers = headers.set('Authorization', `Bearer ${this.token}`);
+    //     // @ts-ignore
+    //     return this.http.put<QuanlyModel>(`${this.apiCommon}/${id}`, {headers});
+    // }
+
+    updateManage(quanlyModel: QuanlyModel): Observable<QuanlyModel> {
         let headers = new HttpHeaders();
         headers = headers.set('Authorization', `Bearer ${this.token}`);
         // @ts-ignore
-        return this.http.put<QuanlyModel>(`${this.apiCommon}/${id}`, {headers});
+        return this.http.put(`${this.apiCommon}/${quanlyModel.id}`, quanlyModel, {headers});
     }
 
     deleteManage(id: any): Observable<QuanlyModel> {

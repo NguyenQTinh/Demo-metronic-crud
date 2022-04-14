@@ -1,13 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="74c529c5-5418-45ed-b028-94ea97472d2b" name="Changes" comment="gitinor - workspace.xml" />
+    <list default="true" id="74c529c5-5418-45ed-b028-94ea97472d2b" name="Changes" comment="Fix-bug 1: Update chưa xong 1">
+      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo1/src/app/_metronic/shared/crud-table/services/table.service.ts" beforeDir="false" afterPath="$PROJECT_DIR$/demo1/src/app/_metronic/shared/crud-table/services/table.service.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo1/src/app/pages/quanly/_service/quanly.service.ts" beforeDir="false" afterPath="$PROJECT_DIR$/demo1/src/app/pages/quanly/_service/quanly.service.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo1/src/app/pages/quanly/create-udate/create-udate.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/demo1/src/app/pages/quanly/create-udate/create-udate.component.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo1/src/app/pages/quanly/create-udate/create-udate.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/demo1/src/app/pages/quanly/create-udate/create-udate.component.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo1/src/app/pages/quanly/quanly.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/demo1/src/app/pages/quanly/quanly.component.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo1/src/app/pages/quanly/quanly.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/demo1/src/app/pages/quanly/quanly.component.ts" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="day2-giaodien" />
+      </map>
+    </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="GitSEFilterConfiguration">
@@ -27,7 +41,7 @@
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="last_opened_file_path" value="E:/test camera" />
+    <property name="last_opened_file_path" value="T:/DemoCrud" />
     <property name="node.js.detected.package.tslint" value="true" />
     <property name="node.js.selected.package.tslint" value="(autodetect)" />
     <property name="nodejs_package_manager_path" value="yarn" />
@@ -48,7 +62,20 @@
       <workItem from="1649297081950" duration="9106000" />
       <workItem from="1649312734296" duration="12629000" />
       <workItem from="1649340960550" duration="11881000" />
-      <workItem from="1649380687684" duration="4680000" />
+      <workItem from="1649380687684" duration="13284000" />
+      <workItem from="1649399581562" duration="13825000" />
+      <workItem from="1649437235615" duration="1497000" />
+      <workItem from="1649677474348" duration="1490000" />
+      <workItem from="1649685966240" duration="440000" />
+      <workItem from="1649726053511" duration="25349000" />
+      <workItem from="1649756928445" duration="1812000" />
+      <workItem from="1649815219699" duration="2498000" />
+      <workItem from="1649831910837" duration="5698000" />
+      <workItem from="1649839512647" duration="7029000" />
+      <workItem from="1649848649709" duration="4794000" />
+      <workItem from="1649860041483" duration="7989000" />
+      <workItem from="1649898746076" duration="6711000" />
+      <workItem from="1649906213676" duration="12233000" />
     </task>
     <task id="LOCAL-00001" summary="all file">
       <created>1649385057643</created>
@@ -71,7 +98,49 @@
       <option name="project" value="LOCAL" />
       <updated>1649385699709</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="all fileaaa">
+      <created>1649386029811</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1649386029811</updated>
+    </task>
+    <task id="LOCAL-00005" summary="file mơi">
+      <created>1649734001725</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1649734001726</updated>
+    </task>
+    <task id="LOCAL-00006" summary="Thêm mới ok">
+      <created>1649756559608</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1649756559608</updated>
+    </task>
+    <task id="LOCAL-00007" summary="Fix-bug 1: Update">
+      <created>1649841385947</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1649841385947</updated>
+    </task>
+    <task id="LOCAL-00008" summary="Fix-bug 1: Update chưa xong">
+      <created>1649845509310</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1649845509310</updated>
+    </task>
+    <task id="LOCAL-00009" summary="Fix-bug 1: Update chưa xong 1">
+      <created>1649846599226</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1649846599226</updated>
+    </task>
+    <option name="localTasksCounter" value="10" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -87,10 +156,18 @@
         </entry>
       </map>
     </option>
+    <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="all file" />
     <MESSAGE value="gitinor - workspace.xml" />
-    <option name="LAST_COMMIT_MESSAGE" value="gitinor - workspace.xml" />
+    <MESSAGE value="all fileaaa" />
+    <MESSAGE value="file mơi" />
+    <MESSAGE value="form update" />
+    <MESSAGE value="Thêm mới ok" />
+    <MESSAGE value="Fix-bug 1: Update" />
+    <MESSAGE value="Fix-bug 1: Update chưa xong" />
+    <MESSAGE value="Fix-bug 1: Update chưa xong 1" />
+    <option name="LAST_COMMIT_MESSAGE" value="Fix-bug 1: Update chưa xong 1" />
   </component>
 </project>

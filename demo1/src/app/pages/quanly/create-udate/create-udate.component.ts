@@ -40,7 +40,7 @@ export class CreateUdateComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit(): void {
-        this.isLoading$ = this.mangeService.isLoading$; // chạy sever - bất đồng b
+        this.isLoading$ = this.mangeService.isLoading$;
         this.listOptionDtos = [
             {resolution: '480p', price: '0'},
             {resolution: '720p', price: '0'},
@@ -60,7 +60,6 @@ export class CreateUdateComponent implements OnInit, OnDestroy {
         const sb = this.mangeService.getItemById(this.id).pipe(
             first(),
             catchError((err) => {
-                // Nếu mà lỗi sẽ trả ra thông báo lỗi
                 this.mangeService.handleTbError(err);
                 this.modal.dismiss(err.message);
                 alert('lỗi tùm lum luôn');
@@ -68,7 +67,6 @@ export class CreateUdateComponent implements OnInit, OnDestroy {
             })
         ).subscribe((res: QuanlyModel) => {
             this.patchFormValue(res);
-            // Đúng thì đưa ra thông tin mà form đã nhập
         });
         this.subscriptions.push(sb);
     }
@@ -76,7 +74,7 @@ export class CreateUdateComponent implements OnInit, OnDestroy {
     // PatchValue: cập nhật lại
     patchFormValue(data: QuanlyModel) {
         this.formGroup.patchValue({
-           name: data.name,
+            name: data.name,
             maxDayStorage: data.maxDayStorage,
             clServiceOptionDtos: data.clServiceOptionDtos,
             active: data.active,
@@ -96,10 +94,8 @@ export class CreateUdateComponent implements OnInit, OnDestroy {
 
     // pathDtos và patchValues: dùng cho thằng form clServiceOptionDtos
     patchDtos() {
-        // const control = this.formGroup.get('clServiceOptionDtos') as FormArray;
-        const control = (this.formGroup.get('clServiceOptionDtos') as FormArray).controls;
+        const control = this.formGroup.get('clServiceOptionDtos') as FormArray;
         this.listOptionDtos.forEach(x => {
-            // Duyệt qua mảng listOptionDtos, rôi pusg vào mảng clServiceOptionDtos ở FormGroup
             control.push(this.patchValues(x.resolution, x.price));
         });
     }
@@ -122,9 +118,9 @@ export class CreateUdateComponent implements OnInit, OnDestroy {
     }
 
     edit() {
-        const sbUpdate = this.mangeService.updateManage(this.id).pipe(
+        const sbUpdate = this.mangeService.updateManage(this.ql).pipe(
             tap(() => {
-                alert(this.id + 'Cập nhật thành công');
+                alert('Cập nhật thành công');
                 this.modal.close();
             }),
             catchError((errorMessage) => {
@@ -138,9 +134,9 @@ export class CreateUdateComponent implements OnInit, OnDestroy {
     }
 
     create() {
-        const sbCreate = this.mangeService.creatManage(this.id).pipe(
+        const sbCreate = this.mangeService.creatManage(this.ql).pipe(
             tap(() => {
-                alert(this.id + 'Thêm mới thành công');
+                alert('Thêm mới thành công');
                 this.modal.close();
             }),
             catchError((errorMessage) => {
@@ -181,8 +177,8 @@ export class CreateUdateComponent implements OnInit, OnDestroy {
             //     }
             //     return of(this.ql);
             // }
-            catchError( err => {
-                alert('Nhóm Dịch Vụ và Số Ngày Lưu Trữ đã tồn tại' );
+            catchError(err => {
+                alert('Nhóm Dịch Vụ và Số Ngày Lưu Trữ đã tồn tại');
                 return of(this.ql);
             })
         ).subscribe(res => this.ql = res);
