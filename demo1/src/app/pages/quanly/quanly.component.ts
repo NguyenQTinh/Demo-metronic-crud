@@ -51,31 +51,31 @@ export class QuanlyComponent implements OnInit, OnDestroy {
 
     filterForm() {
         this.filterGroup = this.fb.group({
-            days: [''],
-            status: [''],
+            maxDayStorage: [''],
+            active: [''],
             searchTerm: [''],
         });
         this.subscriptions.push(
-            this.filterGroup.controls.days.valueChanges.subscribe(() =>
+            this.filterGroup.controls.maxDayStorage.valueChanges.subscribe(() =>
                 this.filter()
             )
         );
         this.subscriptions.push(
-            this.filterGroup.controls.status.valueChanges.subscribe(() => this.filter())
+            this.filterGroup.controls.active.valueChanges.subscribe(() => this.filter())
         );
     }
 
     filter() {
         const filter = {};
-        const days = this.filterGroup.get('days').value;
-        if (days) {
+        const maxDayStorage = this.filterGroup.get('maxDayStorage').value;
+        if (maxDayStorage) {
             /* tslint:disable:no-string-literal */
-            filter['days'] = days;
+            filter['maxDayStorage'] = maxDayStorage;
         }
 
-        const status = this.filterGroup.get('status').value;
-        if (status) {
-            filter['status'] = status;
+        const active = this.filterGroup.get('active').value;
+        if (active) {
+            filter['active'] = active;
         }
         this.manageService.patchState({ filter });
     }

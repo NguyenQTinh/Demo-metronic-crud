@@ -16,7 +16,7 @@
             <div class="form-group dft-form-control row">
                 <ng-container [formGroup]="filterGroup">
                     <div class="col-3">
-                        <select class="form-control" placeholder="Số ngày lưu trữ" name="days" formControlName="days">
+                        <select class="form-control" placeholder="Số ngày lưu trữ" name="maxDayStorage" formControlName="maxDayStorage">
                             <option value="">Số ngày lưu trữ</option>
                             <option *ngFor="let item of allDays"
                                     [value]="item.maxDayStorage">{{item.maxDayStorage}}</option>
@@ -24,7 +24,7 @@
                     </div>
 
                     <div class="col-3">
-                        <select class="form-control" placeholder="Trạng thái" name="status" formControlName="status">
+                        <select class="form-control" placeholder="Trạng thái" name="active" formControlName="active">
                             <option value="">Trạng thái</option>
                             <option value="true">Kích Hoạt</option>
                             <option value="false">Hủy Kích Hoạt</option>
