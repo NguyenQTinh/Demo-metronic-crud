@@ -36,7 +36,6 @@ export class QuanlyComponent implements OnInit, OnDestroy {
     allDays: any[];
 
     ngOnInit(): void {
-
         this.manageService.fetch();  // load dữ liệu
         // this.manageService.items$.subscribe(res => console.log(res));
         this.grouping = this.manageService.grouping;
@@ -47,36 +46,56 @@ export class QuanlyComponent implements OnInit, OnDestroy {
 
         this.getMaxDaysStorage();
         this.searchForm();
+        this.filterForm();
     }
 
-    // filterForm() {
-    //     this.filterGroup = this.fb.group({
-    //         days: [''],
-    //         type: [''],
-    //     });
-    //     this.subscriptions.push(
-    //         this.filterGroup.controls.status.valueChanges.subscribe(() =>
-    //             this.filter()
-    //         )
-    //     );
-    //     this.subscriptions.push(
-    //         this.filterGroup.controls.type.valueChanges.subscribe(() => this.filter())
-    //     );
-    // }
-    //
-    // filter() {
-    //     const filter = {};
-    //     const status = this.filterGroup.get('status').value;
-    //     // if (status) {
-    //     //     filter['status'] = status;
-    //     // }
-    //
-    //     const type = this.filterGroup.get('type').value;
-    //     // if (type) {
-    //     //     filter['type'] = type;
-    //     // }
-    //     this.manageService.patchState({ filter });
-    // }
+    filterForm() {
+        this.filterGroup = this.fb.group({
+            days: [''],
+            status: [''],
+            searchTerm: [''],
+        });
+        this.subscriptions.push(
+            this.filterGroup.controls.days.valueChanges.subscribe(() =>
+                this.filter()
+            )
+        );
+        this.subscriptions.push(
+            this.filterGroup.controls.status.valueChanges.subscribe(() => this.filter())
+        );
+    }
+
+    filter() {
+        const filter = {};
+        const days = this.filterGroup.get('days').value;
+        if (days) {
+            /* tslint:disable:no-string-literal */
+            filter['days'] = days;
+        }
+
+        const status = this.filterGroup.get('status').value;
+        if (status) {
+            filter['status'] = status;
+        }
+        this.manageService.patchState({ filter });
+    }
+
+    searchForm() {
+        this.searchGroup = this.fb.group({
+            searchTerm: [''],
+        });
+        const searchEvent = this.searchGroup.controls.searchTerm.valueChanges
+            .pipe(
+                debounceTime(150),
+                distinctUntilChanged()
+            )
+            .subscribe((val) => this.search(val));
+        this.subscriptions.push(searchEvent);
+    }
+
+    search(searchTerm: string) {
+        this.manageService.patchState({searchTerm});
+    }
 
     create() {
         // this.modalService.open(CreateUdateComponent, {size: 'lg'}); // open popup
@@ -130,24 +149,6 @@ export class QuanlyComponent implements OnInit, OnDestroy {
             sorting.direction = sorting.direction === 'asc' ? 'desc' : 'asc';
         }
         this.manageService.patchState({sorting});
-    }
-
-
-    searchForm() {
-        this.searchGroup = this.fb.group({
-            searchTerm: [''],
-        });
-        const searchEvent = this.searchGroup.controls.searchTerm.valueChanges
-            .pipe(
-                debounceTime(150),
-                distinctUntilChanged()
-            )
-            .subscribe((val) => this.search(val));
-        this.subscriptions.push(searchEvent);
-    }
-
-    search(searchTerm: string) {
-        this.manageService.patchState({searchTerm});
     }
 
     // pagination

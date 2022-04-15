@@ -39,8 +39,6 @@ export class CreateUdateComponent implements OnInit, OnDestroy {
 
     private subscriptions: Subscription[] = [];
 
-    listOptionDtos: any;
-
     constructor(
         public modal: NgbActiveModal,
         private fb: FormBuilder,
@@ -50,13 +48,6 @@ export class CreateUdateComponent implements OnInit, OnDestroy {
 
     ngOnInit(): void {
         this.isLoading$ = this.mangeService.isLoading$; // chạy sever - bất đồng b
-        this.listOptionDtos = [
-            {resolution: '480p', price: '0'},
-            {resolution: '720p', price: '0'},
-            {resolution: '1080p', price: '0'},
-            {resolution: '2K', price: '0'},
-            {resolution: '4K', price: '0'},
-        ];
         this.initForm();
 
         if (this.id) {
@@ -150,7 +141,7 @@ export class CreateUdateComponent implements OnInit, OnDestroy {
                 // nếu có => là Update
                 // nếu ko => là Create
         console.log(formData);
-        const resolutionPriceArr = [];
+        const resolutionPriceArr = []; // để hứng giá trị
 
         const serviceOptionList = this.serviceOption[0]?.hasDirty === false ? this.serviceOption : this.serviceOption.clServiceOptionDtos;
         serviceOptionList.forEach(service => {
@@ -174,6 +165,8 @@ export class CreateUdateComponent implements OnInit, OnDestroy {
                     break;
             }
         });
+        console.log(resolutionPriceArr); // mảng các object
+
         this.ql = {
             id: this.id,
             name: formData.name,
@@ -182,7 +175,7 @@ export class CreateUdateComponent implements OnInit, OnDestroy {
             active: formData.active,
             note: formData.note,
         };
-        console.log(this.ql);
+        console.log(this.ql);  // <== trả đúng về kiểu sever muốn nhận
     }
 
     edit() {

@@ -21,7 +21,7 @@ export class QuanlyService extends TableService<QuanlyModel> implements OnDestro
         super(http);
     }
 
-    token = 'eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJzeXNhZG1pbkB0aGluZ3Nib2FyZC5vcmciLCJzY29wZXMiOlsiU1lTX0FETUlOIl0sInVzZXJJZCI6ImRkOWM5ZmMwLTU3NjctMTFlYy1hMTQxLWExZjM4MTFhMjQ2ZCIsImZpcnN0TmFtZSI6IiIsImxhc3ROYW1lIjoiU1lTVEVNIEFETUlOIiwiZW5hYmxlZCI6dHJ1ZSwiaXNQdWJsaWMiOmZhbHNlLCJ0ZW5hbnRJZCI6IjEzODE0MDAwLTFkZDItMTFiMi04MDgwLTgwODA4MDgwODA4MCIsImN1c3RvbWVySWQiOiIxMzgxNDAwMC0xZGQyLTExYjItODA4MC04MDgwODA4MDgwODAiLCJpc3MiOiJ0aGluZ3Nib2FyZC5pbyIsImlhdCI6MTY0OTgzOTY5MiwiZXhwIjoxNjQ5ODQ4NjkyfQ.ge1QtHqdlJaxpQkEPaz1zo_fKpxllXFp9jNT1wBggEyf-n6y8jxMjCvw0VUzBUwjL0geU1B5R25s_KKh-h-TDw';
+    token = 'eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJzeXNhZG1pbkB0aGluZ3Nib2FyZC5vcmciLCJzY29wZXMiOlsiU1lTX0FETUlOIl0sInVzZXJJZCI6ImRkOWM5ZmMwLTU3NjctMTFlYy1hMTQxLWExZjM4MTFhMjQ2ZCIsImZpcnN0TmFtZSI6IiIsImxhc3ROYW1lIjoiU1lTVEVNIEFETUlOIiwiZW5hYmxlZCI6dHJ1ZSwiaXNQdWJsaWMiOmZhbHNlLCJ0ZW5hbnRJZCI6IjEzODE0MDAwLTFkZDItMTFiMi04MDgwLTgwODA4MDgwODA4MCIsImN1c3RvbWVySWQiOiIxMzgxNDAwMC0xZGQyLTExYjItODA4MC04MDgwODA4MDgwODAiLCJpc3MiOiJ0aGluZ3Nib2FyZC5pbyIsImlhdCI6MTY0OTk4ODAwOCwiZXhwIjoxNjQ5OTk3MDA4fQ.xGKyR7qvrlgyow5uGXZbpK9C3Y2H4M0KUpdkE22yXm2qP2lf2KWGQhgfYXCXB2W7NB6GnSszsHmcNDsSk97K_g';
 
     apiCommon = 'http://123.30.214.139:17104/api/mange/group-service';
 
@@ -68,11 +68,10 @@ export class QuanlyService extends TableService<QuanlyModel> implements OnDestro
         );
     }
 
-    creatManage(id: any): Observable<QuanlyModel> {
+    creatManage(): Observable<QuanlyModel> {
         let headers = new HttpHeaders();
         headers = headers.set('Authorization', `Bearer ${this.token}`);
-        // @ts-ignore
-        return this.http.post<QuanlyModel>(`${this.apiCommon}/${id}`, {headers});
+        return this.http.post<QuanlyModel>(`${this.apiCommon}`, {headers});
     }
 
     updateManage(id: any): Observable<QuanlyModel> {
