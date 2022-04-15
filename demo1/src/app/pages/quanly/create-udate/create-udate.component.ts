@@ -28,6 +28,15 @@ export class CreateUdateComponent implements OnInit, OnDestroy {
     isLoading$;
     ql: QuanlyModel;
     formGroup: FormGroup;
+    serviceOption: any = [
+        {hasDirty: false},
+        {resolution: '480p'},
+        {resolution: '720p'},
+        {resolution: '1080p'},
+        {resolution: '2k'},
+        {resolution: '4k'}
+    ]; // create
+
     private subscriptions: Subscription[] = [];
 
     listOptionDtos: any;
@@ -49,7 +58,6 @@ export class CreateUdateComponent implements OnInit, OnDestroy {
             {resolution: '4K', price: '0'},
         ];
         this.initForm();
-        this.patchDtos();
 
         if (this.id) {
             this.fetchFormData();
@@ -67,20 +75,47 @@ export class CreateUdateComponent implements OnInit, OnDestroy {
                 return of(EMPTY_ALARM);
             })
         ).subscribe((res: QuanlyModel) => {
+            this.serviceOption = res; // cap nhat 1 object
             this.patchFormValue(res);
-            // Đúng thì đưa ra thông tin mà form đã nhập
         });
         this.subscriptions.push(sb);
     }
 
-    // PatchValue: cập nhật lại
     patchFormValue(data: QuanlyModel) {
+        const resolutionArr = [];
+        data.clServiceOptionDtos.forEach(service => {
+            switch (service.resolution) {
+                case '480p':
+                    resolutionArr.push({p480: service.price});
+                    break;
+                case '720p':
+                    resolutionArr.push({'p720': service.price});
+                    break;
+                case '1080p':
+                    resolutionArr.push({'p1080': service.price});
+                    break;
+                case '2k':
+                    resolutionArr.push({'k2': service.price});
+                    break;
+                case '4k':
+                    resolutionArr.push({'k4': service.price});
+                    break;
+                default:
+                    break;
+            }
+        });
+        console.log(resolutionArr);
+        let patchObject = {};
+        resolutionArr.forEach(res => {
+            patchObject = { ...patchObject, ...res };
+        });
         this.formGroup.patchValue({
-           name: data.name,
+            name: data.name,
             maxDayStorage: data.maxDayStorage,
             clServiceOptionDtos: data.clServiceOptionDtos,
             active: data.active,
             note: data.note,
+            ...patchObject
         });
     }
 
@@ -88,41 +123,70 @@ export class CreateUdateComponent implements OnInit, OnDestroy {
         this.formGroup = this.fb.group({
             name: [''],
             maxDayStorage: [''],
-            clServiceOptionDtos: this.fb.array([]),
+            // clServiceOptionDtos: this.fb.array([]),
             active: true,
             note: [''],
-        });
-    }
-
-    // pathDtos và patchValues: dùng cho thằng form clServiceOptionDtos
-    patchDtos() {
-        // const control = this.formGroup.get('clServiceOptionDtos') as FormArray;
-        const control = (this.formGroup.get('clServiceOptionDtos') as FormArray).controls;
-        this.listOptionDtos.forEach(x => {
-            // Duyệt qua mảng listOptionDtos, rôi pusg vào mảng clServiceOptionDtos ở FormGroup
-            control.push(this.patchValues(x.resolution, x.price));
-        });
-    }
-
-    patchValues(resolution, price) {
-        return this.fb.group({
-            resolution: [resolution],
-            price: [price]
+            p480: [''],
+            p720: [''],
+            p1080: [''],
+            k2: [''],
+            k4: [''],
         });
     }
 
     save() {
         this.prepareReqData();
-        // this.createOrUpdate();
-        if (this.ql.id) {
-            this.edit();
-        } else {
-            this.create();
-        }
+        this.createOrUpdate();
+        // if (this.ql.id) {
+        //     this.edit();
+        // } else {
+        //     this.create();
+        // }
+    }
+
+    // Creat or Update deu vao day nhu nhau
+    private prepareReqData() {
+        const formData = this.formGroup.value; // Xác định xem form có giá trị ko
+                // nếu có => là Update
+                // nếu ko => là Create
+        console.log(formData);
+        const resolutionPriceArr = [];
+
+        const serviceOptionList = this.serviceOption[0]?.hasDirty === false ? this.serviceOption : this.serviceOption.clServiceOptionDtos;
+        serviceOptionList.forEach(service => {
+            switch (service.resolution) {
+                case '480p':
+                    resolutionPriceArr.push({id: service.id, resolution: '480p', price: +formData.p480});
+                    break;
+                case '720p':
+                    resolutionPriceArr.push({id: service.id, resolution: '720p', price: +formData.p720});
+                    break;
+                case '1080p':
+                    resolutionPriceArr.push({id: service.id, resolution: '1080p', price: +formData.p1080});
+                    break;
+                case '2k':
+                    resolutionPriceArr.push({id: service.id, resolution: '2k', price: +formData.k2});
+                    break;
+                case '4k':
+                    resolutionPriceArr.push({id: service.id, resolution: '4k', price: +formData['k4']});
+                // tslint:disable-next-line:no-switch-case-fall-through
+                default:
+                    break;
+            }
+        });
+        this.ql = {
+            id: this.id,
+            name: formData.name,
+            maxDayStorage: formData.maxDayStorage,
+            clServiceOptionDtos: resolutionPriceArr,
+            active: formData.active,
+            note: formData.note,
+        };
+        console.log(this.ql);
     }
 
     edit() {
-        const sbUpdate = this.mangeService.updateManage(this.id).pipe(
+        const sbUpdate = this.mangeService.updateManage(this.ql).pipe(
             tap(() => {
                 alert(this.id + 'Cập nhật thành công');
                 this.modal.close();
@@ -138,7 +202,7 @@ export class CreateUdateComponent implements OnInit, OnDestroy {
     }
 
     create() {
-        const sbCreate = this.mangeService.creatManage(this.id).pipe(
+        const sbCreate = this.mangeService.creatManage().pipe(
             tap(() => {
                 alert(this.id + 'Thêm mới thành công');
                 this.modal.close();
@@ -149,21 +213,6 @@ export class CreateUdateComponent implements OnInit, OnDestroy {
             }),
         ).subscribe((res: QuanlyModel) => this.ql = res);
         this.subscriptions.push(sbCreate);
-    }
-
-    private prepareReqData() {
-        const formData = this.formGroup.value;
-        console.log('formData: ' + formData);
-        console.log(typeof formData.maxDayStorage);
-        console.log(typeof formData.clServiceOptionDtos);
-        this.ql = {
-            id: this.id,
-            name: formData.name,
-            maxDayStorage: formData.maxDayStorage,
-            clServiceOptionDtos: formData.clServiceOptionDtos,
-            active: formData.active,
-            note: formData.note,
-        };
     }
 
     createOrUpdate() {
@@ -181,8 +230,8 @@ export class CreateUdateComponent implements OnInit, OnDestroy {
             //     }
             //     return of(this.ql);
             // }
-            catchError( err => {
-                alert('Nhóm Dịch Vụ và Số Ngày Lưu Trữ đã tồn tại' );
+            catchError(err => {
+                alert('Nhóm Dịch Vụ và Số Ngày Lưu Trữ đã tồn tại');
                 return of(this.ql);
             })
         ).subscribe(res => this.ql = res);

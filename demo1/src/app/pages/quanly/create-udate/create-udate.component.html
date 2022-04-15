@@ -3,9 +3,9 @@
     <div class="modal-header">
         <div class="modal-title h4 dft-title-popup w-100 d-flex justify-content-between"
              id="example-modal-sizes-title-lg">
-                <ng-container *ngIf="id">Cập nhật</ng-container>
-                <ng-container *ngIf="!id">Thêm mới</ng-container>
-                Nhóm dịch vụ
+            <ng-container *ngIf="id">Cập nhật</ng-container>
+            <ng-container *ngIf="!id">Thêm mới</ng-container>
+            Nhóm dịch vụ
         </div>
         <div class="modal-title">
             <mat-icon class="btn-close" (click)="closeModal()">close</mat-icon>
@@ -39,27 +39,102 @@
                         </div>
                     </div>
 
-                    <div class="form-group row" formArrayName="clServiceOptionDtos">
-                        <!--                        <div class="col-12" *ngFor="let e of formGroup.get('clServiceOptionDtos').controls, let i=index">-->
-                        <div class="col-12"
-                             *ngFor="let e of formGroup.get('clServiceOptionDtos')['controls'], let i=index">
-                            <div class="row" [formGroupName]="i">
-                                <div class="col-4">
-                                    <label>Độ phân giải<span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control form-control-solid form-control-lg"
-                                           formControlName="resolution"
-                                    />
-                                </div>
-                                <div class="col-8">
-                                    <label>Giá tiền (VND)<span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control form-control-solid form-control-lg"
-                                           placeholder="Giá tiền (VND)"
-                                           formControlName="price"
-                                    />
-                                </div>
+                    <!--   480                 -->
+                    <div class="col-12">
+                        <div class="row">
+                            <div class="col-4">
+                                <label>Độ phân giải<span class="text-danger">*</span></label>
+                                <input type="text" class="form-control form-control-solid form-control-lg"
+                                       value="480p" readonly
+                                />
+                            </div>
+                            <div class="col-8">
+                                <label>Giá tiền (VND)<span class="text-danger">*</span></label>
+                                <input type="text" class="form-control form-control-solid form-control-lg"
+                                       placeholder="Giá tiền (VND)"
+                                       formControlName="p480"
+                                />
                             </div>
                         </div>
                     </div>
+
+                    <!--   720                 -->
+                    <div class="col-12">
+                        <div class="row">
+                            <div class="col-4">
+                                <label>Độ phân giải<span class="text-danger">*</span></label>
+                                <input type="text" class="form-control form-control-solid form-control-lg"
+                                       value="720p" readonly
+                                />
+                            </div>
+                            <div class="col-8">
+                                <label>Giá tiền (VND)<span class="text-danger">*</span></label>
+                                <input type="text" class="form-control form-control-solid form-control-lg"
+                                       placeholder="Giá tiền (VND)"
+                                       formControlName="p720"
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    <!--   1080p                 -->
+                    <div class="col-12">
+                        <div class="row">
+                            <div class="col-4">
+                                <label>Độ phân giải<span class="text-danger">*</span></label>
+                                <input type="text" class="form-control form-control-solid form-control-lg"
+                                       value="1080p" readonly
+                                />
+                            </div>
+                            <div class="col-8">
+                                <label>Giá tiền (VND)<span class="text-danger">*</span></label>
+                                <input type="text" class="form-control form-control-solid form-control-lg"
+                                       placeholder="Giá tiền (VND)"
+                                       formControlName="p1080"
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    <!--   2k                 -->
+                    <div class="col-12">
+                        <div class="row">
+                            <div class="col-4">
+                                <label>Độ phân giải<span class="text-danger">*</span></label>
+                                <input type="text" class="form-control form-control-solid form-control-lg"
+                                       value="2k" readonly
+                                />
+                            </div>
+                            <div class="col-8">
+                                <label>Giá tiền (VND)<span class="text-danger">*</span></label>
+                                <input type="text" class="form-control form-control-solid form-control-lg"
+                                       placeholder="Giá tiền (VND)"
+                                       formControlName="k2"
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    <!--   4k                 -->
+                    <div class="col-12">
+                        <div class="row">
+                            <div class="col-4">
+                                <label>Độ phân giải<span class="text-danger">*</span></label>
+                                <input type="text" class="form-control form-control-solid form-control-lg"
+                                       value="4k" readonly
+                                />
+                            </div>
+                            <div class="col-8">
+                                <label>Giá tiền (VND)<span class="text-danger">*</span></label>
+                                <input type="text" class="form-control form-control-solid form-control-lg"
+                                       placeholder="Giá tiền (VND)"
+                                       formControlName="k4"
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+
 
                     <div class="col-xl-12 ">Trạng thái</div>
                     <div class="form-group col-xl-12 ">
