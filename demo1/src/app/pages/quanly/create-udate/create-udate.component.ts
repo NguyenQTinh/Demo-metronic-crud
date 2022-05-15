@@ -95,7 +95,7 @@ export class CreateUdateComponent implements OnInit, OnDestroy {
                     break;
             }
         });
-        console.log(resolutionArr);
+        console.log(resolutionArr); // kiểu [{...}, {...}, {...}, {...}]
         let patchObject = {};
         resolutionArr.forEach(res => {
             patchObject = { ...patchObject, ...res };

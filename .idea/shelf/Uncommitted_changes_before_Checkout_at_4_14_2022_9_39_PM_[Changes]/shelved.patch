@@ -1,0 +1,340 @@
+Index: demo1/src/app/_metronic/shared/crud-table/services/table.service.ts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>// tslint:disable:variable-name\r\nimport {HttpClient, HttpHeaders} from '@angular/common/http';\r\nimport {BehaviorSubject, Observable, of, Subscription, throwError} from 'rxjs';\r\nimport {catchError, finalize, tap} from 'rxjs/operators';\r\nimport {PaginatorState} from '../models/paginator.model';\r\nimport {ITableState, TableResponseModel} from '../models/table.model';\r\nimport {BaseModel} from '../models/base.model';\r\nimport {SortState} from '../models/sort.model';\r\nimport {GroupingState} from '../models/grouping.model';\r\nimport {environment} from '../../../../../environments/environment';\r\nimport {TbErrorCode, TbErrorResp, UNKNOWN_ERROR} from '../../../../pages/quanly/_model/listErrorCode';\r\n\r\nconst DEFAULT_STATE: ITableState = {\r\n  filter: {},\r\n  paginator: new PaginatorState(),\r\n  sorting: new SortState(),\r\n  searchTerm: '',\r\n  grouping: new GroupingState(),\r\n  entityId: undefined\r\n};\r\n\r\nexport abstract class TableService<T> {\r\n  // Private fields\r\n  private _items$ = new BehaviorSubject<T[]>([]);\r\n  private _isLoading$ = new BehaviorSubject<boolean>(false);\r\n  private _isFirstLoading$ = new BehaviorSubject<boolean>(true);\r\n  private _tableState$ = new BehaviorSubject<ITableState>(DEFAULT_STATE);\r\n  private _errorMessage = new BehaviorSubject<string>('');\r\n  private _subscriptions: Subscription[] = [];\r\n\r\n  // Getters\r\n  get items$() {\r\n    return this._items$.asObservable();\r\n  }\r\n\r\n  get isLoading$() {\r\n    return this._isLoading$.asObservable();\r\n  }\r\n\r\n  get isFirstLoading$() {\r\n    return this._isFirstLoading$.asObservable();\r\n  }\r\n\r\n  get errorMessage$() {\r\n    return this._errorMessage.asObservable();\r\n  }\r\n\r\n  get subscriptions() {\r\n    return this._subscriptions;\r\n  }\r\n\r\n  // State getters\r\n  get paginator() {\r\n    return this._tableState$.value.paginator;\r\n  }\r\n\r\n  get filter() {\r\n    return this._tableState$.value.filter;\r\n  }\r\n\r\n  get sorting() {\r\n    return this._tableState$.value.sorting;\r\n  }\r\n\r\n  get searchTerm() {\r\n    return this._tableState$.value.searchTerm;\r\n  }\r\n\r\n  get grouping() {\r\n    return this._tableState$.value.grouping;\r\n  }\r\n\r\n  protected http: HttpClient;\r\n\r\n  // API URL has to be overrided\r\n  // API_URL = `${environment.apiUrl}/endpoint`;\r\n  // API_URL = `${environment.apiUrl}/mange/group-service`;\r\n\r\n  API_URL = 'http://123.30.214.139:17104/api/mange/group-service';\r\n\r\n  token = 'eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJzeXNhZG1pbkB0aGluZ3Nib2FyZC5vcmciLCJzY29wZXMiOlsiU1lTX0FETUlOIl0sInVzZXJJZCI6ImRkOWM5ZmMwLTU3NjctMTFlYy1hMTQxLWExZjM4MTFhMjQ2ZCIsImZpcnN0TmFtZSI6IiIsImxhc3ROYW1lIjoiU1lTVEVNIEFETUlOIiwiZW5hYmxlZCI6dHJ1ZSwiaXNQdWJsaWMiOmZhbHNlLCJ0ZW5hbnRJZCI6IjEzODE0MDAwLTFkZDItMTFiMi04MDgwLTgwODA4MDgwODA4MCIsImN1c3RvbWVySWQiOiIxMzgxNDAwMC0xZGQyLTExYjItODA4MC04MDgwODA4MDgwODAiLCJpc3MiOiJ0aGluZ3Nib2FyZC5pbyIsImlhdCI6MTY0OTkyMTIyNywiZXhwIjoxNjQ5OTMwMjI3fQ.P3L_W90ivg4Vv42m2CP7LMTttWhZCl95hWyIBxaTgDjS_ph1V1HyyU_1phXLjp2kTEGFGkUShTJYwXcGtlxyow';\r\n\r\n  constructor(http: HttpClient) {\r\n    this.http = http;\r\n  }\r\n\r\n  // dft custom\r\n  getQuery(tableState: ITableState): string {\r\n    const paginator = tableState.paginator;\r\n    const textSearch = tableState.searchTerm;\r\n    const sorting = tableState.sorting;\r\n    const filter = tableState.filter;\r\n    let query = `?pageSize=${paginator.pageSize}&page=${paginator.page - 1}`;\r\n    if (textSearch && textSearch.length) {\r\n      query += `&textSearch=${textSearch}`;\r\n    }\r\n    if (sorting) {\r\n      if (sorting.column){\r\n        query += `&sortProperty=${sorting.column}`;\r\n      }\r\n      if (sorting.direction) {\r\n        query += `&sortOrder=${sorting.direction}`;\r\n      }\r\n    }\r\n    if (filter) {\r\n      for (const key of Object.keys(filter)) {\r\n        query += `&${key}=${filter[key]}`;\r\n      }\r\n    }\r\n    return query;\r\n  }\r\n\r\n  createOrUpdate(item: BaseModel): Observable<BaseModel> {\r\n    let headers = new HttpHeaders();\r\n    headers = headers.set('Authorization', `Bearer ${this.token}`);\r\n\r\n    this._isLoading$.next(true);\r\n    // this._errorMessage.next('');\r\n    return this.http.post<BaseModel>(this.API_URL, item, {headers}).pipe(\r\n        catchError(err => {\r\n          // map err về chung 1 dạng TbErrorResp, error nào k rõ => UNKNOWN_ERROR\r\n          // this._errorMessage.next(err);\r\n          console.error('CREATE OR UPDATE ITEM', item, err);\r\n          return this.getTbErrorRespFromErr(err);\r\n        }),\r\n        finalize(() => this._isLoading$.next(false))\r\n    );\r\n  }\r\n\r\n  // end of dft custom\r\n\r\n  // CREATE\r\n  // server should return the object with ID\r\n  create(item: BaseModel): Observable<BaseModel> {\r\n    let headers = new HttpHeaders();\r\n    headers = headers.set('Authorization', `Bearer ${this.token}`);\r\n\r\n    this._isLoading$.next(true);\r\n    // this._errorMessage.next('');\r\n    return this.http.post<BaseModel>(this.API_URL, item, {headers}).pipe(\r\n        catchError(err => {\r\n          // this._errorMessage.next(err);\r\n          console.error('CREATE ITEM', err);\r\n          return this.getTbErrorRespFromErr(err);\r\n        }),\r\n        finalize(() => this._isLoading$.next(false))\r\n    );\r\n  }\r\n\r\n  // READ (Returning filtered list of entities)\r\n  find(tableState: ITableState): Observable<TableResponseModel<T>> {\r\n    let headers = new HttpHeaders();\r\n    headers = headers.set('Authorization', `Bearer ${this.token}`);\r\n\r\n    const url = `${this.API_URL}${this.getQuery(tableState)}`;\r\n    this._errorMessage.next('');\r\n    return this.http.get<TableResponseModel<T>>(url, {headers}).pipe(\r\n        catchError(err => {\r\n          this._errorMessage.next(err);\r\n          console.error('FIND ITEMS', err);\r\n          return of({items: [], total: 0});\r\n        })\r\n    );\r\n  }\r\n\r\n  getItemById(id: any): Observable<BaseModel> {\r\n    let headers = new HttpHeaders();\r\n    headers = headers.set('Authorization', `Bearer ${this.token}`);\r\n\r\n    this._isLoading$.next(true);\r\n    // this._errorMessage.next('');\r\n    const url = `${this.API_URL}/${id}`;\r\n    return this.http.get<BaseModel>(url, {headers}).pipe(\r\n        catchError(err => {\r\n          // this._errorMessage.next(err);\r\n          console.error('GET ITEM BY IT', id, err);\r\n          return this.getTbErrorRespFromErr(err);\r\n        }),\r\n        finalize(() => this._isLoading$.next(false))\r\n    );\r\n  }\r\n\r\n  // UPDATE\r\n  update(item: BaseModel): Observable<any> {\r\n    let headers = new HttpHeaders();\r\n    headers = headers.set('Authorization', `Bearer ${this.token}`);\r\n\r\n    const url = `${this.API_URL}/${item.id}`;\r\n    this._isLoading$.next(true);\r\n    // this._errorMessage.next('');\r\n    return this.http.put(url, item, {headers}).pipe(\r\n        catchError(err => {\r\n          // this._errorMessage.next(err);\r\n          console.error('UPDATE ITEM', item, err);\r\n          return this.getTbErrorRespFromErr(err);\r\n        }),\r\n        finalize(() => this._isLoading$.next(false))\r\n    );\r\n  }\r\n\r\n  // UPDATE Status\r\n  updateStatusForItems(ids: number[], status: number): Observable<any> {\r\n    this._isLoading$.next(true);\r\n    this._errorMessage.next('');\r\n    const body = {ids, status};\r\n    const url = this.API_URL + '/updateStatus';\r\n    return this.http.put(url, body).pipe(\r\n        catchError(err => {\r\n          this._errorMessage.next(err);\r\n          console.error('UPDATE STATUS FOR SELECTED ITEMS', ids, status, err);\r\n          return of([]);\r\n        }),\r\n        finalize(() => this._isLoading$.next(false))\r\n    );\r\n  }\r\n\r\n  // DELETE\r\n  delete(id: any): Observable<any> {\r\n    this._isLoading$.next(true);\r\n    // this._errorMessage.next('');\r\n    const url = `${this.API_URL}/${id}`;\r\n    return this.http.delete(url).pipe(\r\n        catchError(err => {\r\n          // this._errorMessage.next(err);\r\n          console.error('DELETE ITEM', id, err);\r\n          return this.getTbErrorRespFromErr(err);\r\n        }),\r\n        finalize(() => this._isLoading$.next(false))\r\n    );\r\n  }\r\n\r\n  // delete list of items\r\n  deleteItems(ids: number[] = []): Observable<any> {\r\n    this._isLoading$.next(true);\r\n    this._errorMessage.next('');\r\n    const url = this.API_URL + '/deleteItems';\r\n    const body = {ids};\r\n    return this.http.put(url, body).pipe(\r\n        catchError(err => {\r\n          this._errorMessage.next(err);\r\n          console.error('DELETE SELECTED ITEMS', ids, err);\r\n          return of([]);\r\n        }),\r\n        finalize(() => this._isLoading$.next(false))\r\n    );\r\n  }\r\n\r\n  public fetch() {\r\n    this._isLoading$.next(true);\r\n    this._errorMessage.next('');\r\n    const request = this.find(this._tableState$.value)\r\n        .pipe(\r\n            tap((res: TableResponseModel<T>) => {\r\n              this._items$.next(res.items);\r\n              this.patchStateWithoutFetch({\r\n                paginator: this._tableState$.value.paginator.recalculatePaginator(\r\n                    res.total\r\n                ),\r\n              });\r\n            }),\r\n            catchError((err) => {\r\n              this._errorMessage.next(err);\r\n              return of({\r\n                items: [],\r\n                total: 0\r\n              });\r\n            }),\r\n            finalize(() => {\r\n              this._isLoading$.next(false);\r\n              const itemIds = this._items$.value.map((el: T) => {\r\n                const item = (el as unknown) as BaseModel;\r\n                return item.id;\r\n              });\r\n              this.patchStateWithoutFetch({\r\n                grouping: this._tableState$.value.grouping.clearRows(itemIds),\r\n              });\r\n            })\r\n        )\r\n        .subscribe();\r\n    this._subscriptions.push(request);\r\n  }\r\n\r\n  // begin::dft custom\r\n  public dftFetch() {\r\n    this._isLoading$.next(true);\r\n    const request = this.find(this._tableState$.value)\r\n        .pipe(\r\n            tap((res: TableResponseModel<T>) => {\r\n              this._items$.next(res.items);\r\n              this.patchStateWithoutFetch({\r\n                paginator: this._tableState$.value.paginator.recalculatePaginator(\r\n                    res.total\r\n                ),\r\n              });\r\n            }),\r\n            catchError((err) => {\r\n              // err phải đc convert sang TbErrorResp từ trc\r\n              this.handleTbError(err);\r\n              return of({\r\n                items: [],\r\n                total: 0\r\n              });\r\n            }),\r\n            finalize(() => {\r\n              this._isLoading$.next(false);\r\n              const itemIds = this._items$.value.map((el: T) => {\r\n                const item = (el as unknown) as BaseModel;\r\n                return item.id;\r\n              });\r\n              this.patchStateWithoutFetch({\r\n                grouping: this._tableState$.value.grouping.clearRows(itemIds),\r\n              });\r\n            })\r\n        )\r\n        .subscribe();\r\n    this._subscriptions.push(request);\r\n  }\r\n  // end::dft custom\r\n\r\n  public setDefaults() {\r\n    this.patchStateWithoutFetch({filter: {}});\r\n    this.patchStateWithoutFetch({sorting: new SortState()});\r\n    this.patchStateWithoutFetch({grouping: new GroupingState()});\r\n    this.patchStateWithoutFetch({searchTerm: ''});\r\n    this.patchStateWithoutFetch({\r\n      paginator: new PaginatorState()\r\n    });\r\n    this._isFirstLoading$.next(true);\r\n    this._isLoading$.next(true);\r\n    this._tableState$.next(DEFAULT_STATE);\r\n    this._errorMessage.next('');\r\n  }\r\n\r\n  // Base Methods\r\n  public patchState(patch: Partial<ITableState>) {\r\n    this.patchStateWithoutFetch(patch);\r\n    this.fetch();\r\n  }\r\n\r\n  public patchStateWithoutFetch(patch: Partial<ITableState>) {\r\n    const newState = Object.assign(this._tableState$.value, patch);\r\n    this._tableState$.next(newState);\r\n  }\r\n\r\n  // dft custom\r\n  handleTbError(err: TbErrorResp) {\r\n    switch (err.errorCode) {\r\n      case TbErrorCode.UNKNOWN:\r\n        alert('Lỗi không xác định');\r\n        break;\r\n      case TbErrorCode.GENERAL:\r\n        alert('Hệ thống gặp lỗi trong quá trình xử lý');\r\n        break;\r\n      case TbErrorCode.AUTHENTICATION:\r\n        alert('Lỗi xác thực');\r\n        break;\r\n      case TbErrorCode.JWT_TOKEN_EXPIRED:\r\n        alert('Lỗi xác thực');\r\n        break;\r\n      case TbErrorCode.CREDENTIALS_EXPIRED:\r\n        alert('Lỗi xác thực');\r\n        break;\r\n      case TbErrorCode.PERMISSION_DENIED:\r\n        alert('Không đủ quyền truy cập');\r\n        break;\r\n      case TbErrorCode.INVALID_ARGUMENTS:\r\n        alert('Dữ liệu gửi lên hệ thống không hợp lệ');\r\n        break;\r\n      case TbErrorCode.BAD_REQUEST_PARAMS:\r\n        alert('Dữ liệu gửi lên hệ thống không hợp lệ');\r\n        break;\r\n      case TbErrorCode.ITEM_NOT_FOUND:\r\n        alert('Không tìm thấy dữ liệu yêu cầu');\r\n        break;\r\n      case TbErrorCode.TOO_MANY_REQUESTS:\r\n        alert('Lỗi quá nhiều request');\r\n        break;\r\n      case TbErrorCode.TOO_MANY_UPDATES:\r\n        alert('Lỗi quá nhiều update');\r\n        break;\r\n      case TbErrorCode.SUBSCRIPTION_VIOLATION:\r\n        alert('Lỗi kết nối socket');\r\n        break;\r\n      case TbErrorCode.NEWPASSWORD_SAME_OLDPASSWROD:\r\n        alert('Lỗi mật khẩu cũ trùng mật khẩu mới');\r\n        break;\r\n      default:\r\n        alert('Lỗi không xác định');\r\n    }\r\n  }\r\n\r\n  getTbErrorRespFromErr(err: any) {\r\n    let result: TbErrorResp;\r\n    if (err.status === 0) {\r\n      // client side or network err occur\r\n      result = UNKNOWN_ERROR;\r\n    } else {\r\n      // backend err resp\r\n      try {\r\n        result = err.error;\r\n      } catch (err) {\r\n        result = UNKNOWN_ERROR;\r\n      }\r\n    }\r\n    return throwError(result);\r\n  }\r\n\r\n\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/demo1/src/app/_metronic/shared/crud-table/services/table.service.ts b/demo1/src/app/_metronic/shared/crud-table/services/table.service.ts
+--- a/demo1/src/app/_metronic/shared/crud-table/services/table.service.ts	
++++ b/demo1/src/app/_metronic/shared/crud-table/services/table.service.ts	
+@@ -78,7 +78,7 @@
+ 
+   API_URL = 'http://123.30.214.139:17104/api/mange/group-service';
+ 
+-  token = 'eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJzeXNhZG1pbkB0aGluZ3Nib2FyZC5vcmciLCJzY29wZXMiOlsiU1lTX0FETUlOIl0sInVzZXJJZCI6ImRkOWM5ZmMwLTU3NjctMTFlYy1hMTQxLWExZjM4MTFhMjQ2ZCIsImZpcnN0TmFtZSI6IiIsImxhc3ROYW1lIjoiU1lTVEVNIEFETUlOIiwiZW5hYmxlZCI6dHJ1ZSwiaXNQdWJsaWMiOmZhbHNlLCJ0ZW5hbnRJZCI6IjEzODE0MDAwLTFkZDItMTFiMi04MDgwLTgwODA4MDgwODA4MCIsImN1c3RvbWVySWQiOiIxMzgxNDAwMC0xZGQyLTExYjItODA4MC04MDgwODA4MDgwODAiLCJpc3MiOiJ0aGluZ3Nib2FyZC5pbyIsImlhdCI6MTY0OTkyMTIyNywiZXhwIjoxNjQ5OTMwMjI3fQ.P3L_W90ivg4Vv42m2CP7LMTttWhZCl95hWyIBxaTgDjS_ph1V1HyyU_1phXLjp2kTEGFGkUShTJYwXcGtlxyow';
++  token = 'eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJzeXNhZG1pbkB0aGluZ3Nib2FyZC5vcmciLCJzY29wZXMiOlsiU1lTX0FETUlOIl0sInVzZXJJZCI6ImRkOWM5ZmMwLTU3NjctMTFlYy1hMTQxLWExZjM4MTFhMjQ2ZCIsImZpcnN0TmFtZSI6IiIsImxhc3ROYW1lIjoiU1lTVEVNIEFETUlOIiwiZW5hYmxlZCI6dHJ1ZSwiaXNQdWJsaWMiOmZhbHNlLCJ0ZW5hbnRJZCI6IjEzODE0MDAwLTFkZDItMTFiMi04MDgwLTgwODA4MDgwODA4MCIsImN1c3RvbWVySWQiOiIxMzgxNDAwMC0xZGQyLTExYjItODA4MC04MDgwODA4MDgwODAiLCJpc3MiOiJ0aGluZ3Nib2FyZC5pbyIsImlhdCI6MTY0OTk0NTEyOSwiZXhwIjoxNjQ5OTU0MTI5fQ.VTT9KDVsBgb8fG5FNotfOvfGbHvaYIXHeAB7-y409o8TUX0b5oZfZ4FVA_tqFnpKCsFqhPA79j7tFFy-zKnG9w';
+ 
+   constructor(http: HttpClient) {
+     this.http = http;
+Index: demo1/src/app/pages/quanly/create-udate/create-udate.component.ts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>import {Component, Input, OnDestroy, OnInit} from '@angular/core';\r\nimport {NgbActiveModal} from '@ng-bootstrap/ng-bootstrap';\r\nimport {FormArray, FormBuilder, FormGroup} from '@angular/forms';\r\nimport {QuanlyModel} from '../_model/quanly.model';\r\nimport {of, Subscription} from 'rxjs';\r\nimport {QuanlyService} from '../_service/quanly.service';\r\nimport {catchError, first, tap} from 'rxjs/operators';\r\nimport {TbErrorCode, TbErrorResp} from '../_model/listErrorCode';\r\nimport {Customer} from '../../../modules/e-commerce/_models/customer.model';\r\n\r\n\r\nconst EMPTY_ALARM: QuanlyModel = {\r\n    id: undefined,\r\n    name: '',\r\n    maxDayStorage: '',\r\n    active: true,\r\n    note: '',\r\n    clServiceOptionDtos: []\r\n};\r\n\r\n@Component({\r\n    selector: 'app-create-udate',\r\n    templateUrl: './create-udate.component.html',\r\n    styleUrls: ['./create-udate.component.scss']\r\n})\r\nexport class CreateUdateComponent implements OnInit, OnDestroy {\r\n    @Input() id: string;\r\n    isLoading$;\r\n    ql: QuanlyModel;\r\n    formGroup: FormGroup;\r\n    private subscriptions: Subscription[] = [];\r\n\r\n    listOptionDtos: any;\r\n\r\n    constructor(\r\n        public modal: NgbActiveModal,\r\n        private fb: FormBuilder,\r\n        private mangeService: QuanlyService\r\n    ) {\r\n    }\r\n\r\n    ngOnInit(): void {\r\n        this.isLoading$ = this.mangeService.isLoading$;\r\n        this.listOptionDtos = [\r\n            {resolution: '480p', price: '0'},\r\n            {resolution: '720p', price: '0'},\r\n            {resolution: '1080p', price: '0'},\r\n            {resolution: '2K', price: '0'},\r\n            {resolution: '4K', price: '0'},\r\n        ];\r\n        this.initForm();\r\n        this.patchDtos();\r\n\r\n        if (this.id) {\r\n            this.fetchFormData();\r\n        }\r\n    }\r\n\r\n    fetchFormData() {\r\n        const sb = this.mangeService.getItemById(this.id).pipe(\r\n            first(),\r\n            catchError((err) => {\r\n                this.mangeService.handleTbError(err);\r\n                this.modal.dismiss(err.message);\r\n                alert('lỗi tùm lum luôn');\r\n                return of(EMPTY_ALARM);\r\n            })\r\n        ).subscribe((res: QuanlyModel) => {\r\n            this.patchFormValue(res);\r\n        });\r\n        this.subscriptions.push(sb);\r\n    }\r\n\r\n    // PatchValue: cập nhật lại\r\n    patchFormValue(data: QuanlyModel) {\r\n        this.formGroup.patchValue({\r\n            name: data.name,\r\n            maxDayStorage: data.maxDayStorage,\r\n            clServiceOptionDtos: data.clServiceOptionDtos,\r\n            active: data.active,\r\n            note: data.note,\r\n        });\r\n    }\r\n\r\n    initForm() {\r\n        this.formGroup = this.fb.group({\r\n            name: [''],\r\n            maxDayStorage: [''],\r\n            clServiceOptionDtos: this.fb.array([]),\r\n            active: true,\r\n            note: [''],\r\n        });\r\n    }\r\n\r\n    // pathDtos và patchValues: dùng cho thằng form clServiceOptionDtos\r\n    patchDtos() {\r\n        const control = this.formGroup.get('clServiceOptionDtos') as FormArray;\r\n        this.listOptionDtos.forEach(x => {\r\n            control.push(this.patchValues(x.resolution, x.price));\r\n        });\r\n    }\r\n\r\n    patchValues(resolution, price) {\r\n        return this.fb.group({\r\n            resolution: [resolution],\r\n            price: [price]\r\n        });\r\n    }\r\n\r\n    save() {\r\n        this.prepareReqData();\r\n        // this.createOrUpdate();\r\n        if (this.ql.id) {\r\n            this.edit();\r\n        } else {\r\n            this.create();\r\n        }\r\n    }\r\n\r\n    edit() {\r\n        const sbUpdate = this.mangeService.updateManage(this.ql).pipe(\r\n            tap(() => {\r\n                alert('Cập nhật thành công');\r\n                this.modal.close();\r\n            }),\r\n            catchError((errorMessage) => {\r\n                this.modal.dismiss(errorMessage);\r\n                return of(this.ql);\r\n            }),\r\n        ).subscribe((res) => {\r\n            this.ql = res;\r\n        });\r\n        this.subscriptions.push(sbUpdate);\r\n    }\r\n\r\n    create() {\r\n        const sbCreate = this.mangeService.creatManage(this.ql).pipe(\r\n            tap(() => {\r\n                alert('Thêm mới thành công');\r\n                this.modal.close();\r\n            }),\r\n            catchError((errorMessage) => {\r\n                this.modal.dismiss(errorMessage);\r\n                return of(this.mangeService);\r\n            }),\r\n        ).subscribe((res: QuanlyModel) => this.ql = res);\r\n        this.subscriptions.push(sbCreate);\r\n    }\r\n\r\n    private prepareReqData() {\r\n        const formData = this.formGroup.value;\r\n        console.log('formData: ' + formData);\r\n        console.log(typeof formData.maxDayStorage);\r\n        console.log(typeof formData.clServiceOptionDtos);\r\n        this.ql = {\r\n            id: this.id,\r\n            name: formData.name,\r\n            maxDayStorage: formData.maxDayStorage,\r\n            clServiceOptionDtos: formData.clServiceOptionDtos,\r\n            active: formData.active,\r\n            note: formData.note,\r\n        };\r\n    }\r\n\r\n    createOrUpdate() {\r\n        const sbCreateUpdate = this.mangeService.createOrUpdate(this.ql).pipe(\r\n            tap(() => {\r\n                alert(this.id ? 'Cập nhật thành công' : 'Thêm mới thành công');\r\n                this.modal.close();\r\n            }),\r\n            // catchError((err: TbErrorResp) => {\r\n            //     if (err.errorCode === TbErrorCode.BAD_REQUEST_PARAMS && err.message === 'Mangane Service name already exist') {\r\n            //         alert('Tên thông báo đã tồn tại');\r\n            //     } else {\r\n            //         // this.mangeService.handleTbError(err);\r\n            //         alert('Lỗi quá trời lỗi');\r\n            //     }\r\n            //     return of(this.ql);\r\n            // }\r\n            catchError(err => {\r\n                alert('Nhóm Dịch Vụ và Số Ngày Lưu Trữ đã tồn tại');\r\n                return of(this.ql);\r\n            })\r\n        ).subscribe(res => this.ql = res);\r\n        this.subscriptions.push(sbCreateUpdate);\r\n    }\r\n\r\n    closeModal() {\r\n        this.modal.close();\r\n    }\r\n\r\n    ngOnDestroy(): void {\r\n        this.subscriptions.forEach((sb: Subscription) => sb.unsubscribe());\r\n    }\r\n}\r\n\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/demo1/src/app/pages/quanly/create-udate/create-udate.component.ts b/demo1/src/app/pages/quanly/create-udate/create-udate.component.ts
+--- a/demo1/src/app/pages/quanly/create-udate/create-udate.component.ts	
++++ b/demo1/src/app/pages/quanly/create-udate/create-udate.component.ts	
+@@ -9,7 +9,7 @@
+ import {Customer} from '../../../modules/e-commerce/_models/customer.model';
+ 
+ 
+-const EMPTY_ALARM: QuanlyModel = {
++const EMPTY_QUANLY: QuanlyModel = {
+     id: undefined,
+     name: '',
+     maxDayStorage: '',
+@@ -41,15 +41,14 @@
+ 
+     ngOnInit(): void {
+         this.isLoading$ = this.mangeService.isLoading$;
+-        this.listOptionDtos = [
+-            {resolution: '480p', price: '0'},
+-            {resolution: '720p', price: '0'},
+-            {resolution: '1080p', price: '0'},
+-            {resolution: '2K', price: '0'},
+-            {resolution: '4K', price: '0'},
+-        ];
++        this.listOptionDtos = {
++            p480: '480p',
++            p720: '720p',
++            p1080: '1080p',
++            k2: '2K',
++            k4: '4K',
++        };
+         this.initForm();
+-        this.patchDtos();
+ 
+         if (this.id) {
+             this.fetchFormData();
+@@ -63,7 +62,7 @@
+                 this.mangeService.handleTbError(err);
+                 this.modal.dismiss(err.message);
+                 alert('lỗi tùm lum luôn');
+-                return of(EMPTY_ALARM);
++                return of(EMPTY_QUANLY);
+             })
+         ).subscribe((res: QuanlyModel) => {
+             this.patchFormValue(res);
+@@ -79,6 +78,11 @@
+             clServiceOptionDtos: data.clServiceOptionDtos,
+             active: data.active,
+             note: data.note,
++            // p480: data.p480,
++            // p720: data.p720,
++            // p1080: data.p1080,
++            // k2: data.k2,
++            // k4: data.k4,
+         });
+     }
+ 
+@@ -86,24 +90,13 @@
+         this.formGroup = this.fb.group({
+             name: [''],
+             maxDayStorage: [''],
+-            clServiceOptionDtos: this.fb.array([]),
+             active: true,
+             note: [''],
+-        });
+-    }
+-
+-    // pathDtos và patchValues: dùng cho thằng form clServiceOptionDtos
+-    patchDtos() {
+-        const control = this.formGroup.get('clServiceOptionDtos') as FormArray;
+-        this.listOptionDtos.forEach(x => {
+-            control.push(this.patchValues(x.resolution, x.price));
+-        });
+-    }
+-
+-    patchValues(resolution, price) {
+-        return this.fb.group({
+-            resolution: [resolution],
+-            price: [price]
++            p480: [''],
++            p720: [''],
++            p1080: [''],
++            k2: [''],
++            k4: [''],
+         });
+     }
+ 
+@@ -117,6 +110,8 @@
+         }
+     }
+ 
++    prepareReqData(){}
++
+     edit() {
+         const sbUpdate = this.mangeService.updateManage(this.ql).pipe(
+             tap(() => {
+@@ -147,21 +142,6 @@
+         this.subscriptions.push(sbCreate);
+     }
+ 
+-    private prepareReqData() {
+-        const formData = this.formGroup.value;
+-        console.log('formData: ' + formData);
+-        console.log(typeof formData.maxDayStorage);
+-        console.log(typeof formData.clServiceOptionDtos);
+-        this.ql = {
+-            id: this.id,
+-            name: formData.name,
+-            maxDayStorage: formData.maxDayStorage,
+-            clServiceOptionDtos: formData.clServiceOptionDtos,
+-            active: formData.active,
+-            note: formData.note,
+-        };
+-    }
+-
+     createOrUpdate() {
+         const sbCreateUpdate = this.mangeService.createOrUpdate(this.ql).pipe(
+             tap(() => {
+Index: demo1/src/app/pages/quanly/create-udate/create-udate.component.html
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><div class=\"modal-content\">\r\n    <!-- start modal header -->\r\n    <div class=\"modal-header\">\r\n        <div class=\"modal-title h4 dft-title-popup w-100 d-flex justify-content-between\"\r\n             id=\"example-modal-sizes-title-lg\">\r\n            <ng-container *ngIf=\"id\">Cập nhật</ng-container>\r\n            <ng-container *ngIf=\"!id\">Thêm mới</ng-container>\r\n            Nhóm dịch vụ\r\n        </div>\r\n        <div class=\"modal-title\">\r\n            <mat-icon class=\"btn-close\" (click)=\"closeModal()\">close</mat-icon>\r\n        </div>\r\n    </div>\r\n\r\n    <!-- Form   -->\r\n    <div class=\"overlay overlay-block cursor-default modal-body\">\r\n        <ng-container *ngIf=\"isLoading$ | async\">\r\n            <div class=\"overlay-layer bg-transparent\">\r\n                <div class=\"spinner spinner-lg spinner-success\"></div>\r\n            </div>\r\n        </ng-container>\r\n\r\n        <ng-container *ngIf=\"formGroup\">\r\n            <form [formGroup]=\"formGroup\">\r\n                <ng-container class=\"row\">\r\n                    <div class=\"form-group row\">\r\n                        <div class=\"col-12\">\r\n                            <label class=\"form-label\">Tên nhóm dịch vụ <span style=\"color: red;\">*</span></label>\r\n                            <input type=\"text\" class=\"form-control form-control-lg form-control-sm form-control-solid\"\r\n                                   formControlName=\"name\"/>\r\n                        </div>\r\n                    </div>\r\n\r\n                    <div class=\"form-group row\">\r\n                        <div class=\"col-12\">\r\n                            <label class=\"form-label\">Số ngày lưu trữ<span style=\"color: red;\">*</span></label>\r\n                            <input type=\"text\" class=\"form-control form-control-lg form-control-sm form-control-solid\"\r\n                                   formControlName=\"maxDayStorage\"/>\r\n                        </div>\r\n                    </div>\r\n\r\n                    <div class=\"form-group row\" formArrayName=\"clServiceOptionDtos\">\r\n                        <div class=\"col-12\"\r\n                             *ngFor=\"let e of formGroup.get('clServiceOptionDtos')['controls'], let i=index\">\r\n                            <div class=\"row\" [formGroupName]=\"i\">\r\n                                <div class=\"col-4\">\r\n                                    <label>Độ phân giải<span class=\"text-danger\">*</span></label>\r\n                                    <input type=\"text\" class=\"form-control form-control-solid form-control-lg\"\r\n                                           formControlName=\"resolution\"\r\n                                    />\r\n                                </div>\r\n                                <div class=\"col-8\">\r\n                                    <label>Giá tiền (VND)<span class=\"text-danger\">*</span></label>\r\n                                    <input type=\"text\" class=\"form-control form-control-solid form-control-lg\"\r\n                                           placeholder=\"Giá tiền (VND)\"\r\n                                           formControlName=\"price\"\r\n                                    />\r\n                                </div>\r\n                            </div>\r\n                        </div>\r\n                    </div>\r\n\r\n                    <div class=\"col-xl-12 \">Trạng thái</div>\r\n                    <div class=\"form-group col-xl-12 \">\r\n                        <mat-slide-toggle formControlName=\"active\">\r\n                            {{formGroup.get('active').value === true ? 'Kích hoạt' : 'Hủy kích hoạt'}}\r\n                        </mat-slide-toggle>\r\n                    </div>\r\n\r\n                    <div class=\"form-group row\">\r\n                        <div class=\"col-12\">\r\n                            <label class=\"form-label\">Ghi chú</label>\r\n                            <textarea type=\"text\"\r\n                                      class=\"form-control form-control-solid form-control-lg overflow-hidden\"\r\n                                      name=\"note\"\r\n                                      placeholder=\"Ghi chú\"\r\n                                      formControlName=\"note\">\r\n                            </textarea>\r\n                        </div>\r\n                    </div>\r\n                </ng-container>\r\n\r\n                <div class=\"modal-footer dft-form-control justify-content-center\">\r\n                    <button type=\"button\"\r\n                            class=\"btn btn-light btn-elevate mr-2\"\r\n                            (click)=\"modal.dismiss()\"\r\n                    >\r\n                        Huỷ\r\n                    </button>\r\n                    <ng-container>\r\n                        <button type=\"submit\"\r\n                                class=\"btn btn-primary btn-elevate\"\r\n                                [disabled]=\"formGroup.invalid\"\r\n                                (click)=\"save()\"\r\n                        >\r\n                            Lưu\r\n                        </button>\r\n                    </ng-container>\r\n                </div>\r\n            </form>\r\n        </ng-container>\r\n    </div>\r\n\r\n\r\n</div>\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/demo1/src/app/pages/quanly/create-udate/create-udate.component.html b/demo1/src/app/pages/quanly/create-udate/create-udate.component.html
+--- a/demo1/src/app/pages/quanly/create-udate/create-udate.component.html	
++++ b/demo1/src/app/pages/quanly/create-udate/create-udate.component.html	
+@@ -39,24 +39,87 @@
+                         </div>
+                     </div>
+ 
+-                    <div class="form-group row" formArrayName="clServiceOptionDtos">
+-                        <div class="col-12"
+-                             *ngFor="let e of formGroup.get('clServiceOptionDtos')['controls'], let i=index">
+-                            <div class="row" [formGroupName]="i">
++                    <div class="form-group row">
++                        <div class="col-12">
++                            <div class="row">
++                                <div class="col-4">
++                                    <label>Độ phân giải<span class="text-danger">*</span></label>
++                                    <input type="text" class="form-control form-control-solid form-control-lg"
++                                           value="480p" readonly
++                                    />
++                                </div>
++                                <div class="col-8">
++                                    <label>Giá tiền (VND)<span class="text-danger">*</span></label>
++                                    <input type="text" class="form-control form-control-solid form-control-lg"
++                                           placeholder="Giá tiền (VND)" name="p480"
++                                           formControlName="p480"
++                                    />
++                                </div>
++                            </div>
++
++                            <div class="form-group row">
++                                <div class="col-4">
++                                    <label>Độ phân giải<span class="text-danger">*</span></label>
++                                    <input type="text" class="form-control form-control-solid form-control-lg"
++                                           value="720p" readonly
++                                    />
++                                </div>
++                                <div class="col-8">
++                                    <label>Giá tiền (VND)<span class="text-danger">*</span></label>
++                                    <input type="text" class="form-control form-control-solid form-control-lg"
++                                           placeholder="Giá tiền (VND)" name="p720"
++                                           formControlName="p480"
++                                    />
++                                </div>
++                            </div>
++
++                            <div class="form-group row">
++                                <div class="col-4">
++                                    <label>Độ phân giải<span class="text-danger">*</span></label>
++                                    <input type="text" class="form-control form-control-solid form-control-lg"
++                                           value="1080p" readonly
++                                    />
++                                </div>
++                                <div class="col-8">
++                                    <label>Giá tiền (VND)<span class="text-danger">*</span></label>
++                                    <input type="text" class="form-control form-control-solid form-control-lg"
++                                           placeholder="Giá tiền (VND)" name="p1080"
++                                           formControlName="p1080"
++                                    />
++                                </div>
++                            </div>
++
++                            <div class="form-group row">
+                                 <div class="col-4">
+                                     <label>Độ phân giải<span class="text-danger">*</span></label>
+                                     <input type="text" class="form-control form-control-solid form-control-lg"
+-                                           formControlName="resolution"
+-                                    />
++                                           value="2k" readonly/>
+                                 </div>
+                                 <div class="col-8">
+                                     <label>Giá tiền (VND)<span class="text-danger">*</span></label>
+                                     <input type="text" class="form-control form-control-solid form-control-lg"
+-                                           placeholder="Giá tiền (VND)"
+-                                           formControlName="price"
++                                           placeholder="Giá tiền (VND)" name="k2"
++                                           formControlName="k2"
++                                    />
++                                </div>
++                            </div>
++
++                            <div class="form-group row">
++                                <div class="col-4">
++                                    <label>Độ phân giải<span class="text-danger">*</span></label>
++                                    <input type="text" class="form-control form-control-solid form-control-lg"
++                                           value="4k" readonly
++                                    />
++                                </div>
++                                <div class="col-8">
++                                    <label>Giá tiền (VND)<span class="text-danger">*</span></label>
++                                    <input type="text" class="form-control form-control-solid form-control-lg"
++                                           placeholder="Giá tiền (VND)" name="k4"
++                                           formControlName="k4"
+                                     />
+                                 </div>
+                             </div>
++
+                         </div>
+                     </div>
+ 
+Index: demo1/src/app/pages/quanly/_service/quanly.service.ts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>import {Injectable, OnDestroy} from '@angular/core';\r\nimport {ITableState, TableResponseModel, TableService} from '../../../_metronic/shared/crud-table';\r\nimport {QuanlyModel} from '../_model/quanly.model';\r\nimport {HttpClient, HttpHeaders} from '@angular/common/http';\r\nimport {Observable, of} from 'rxjs';\r\nimport {PageData} from '../_model/page-data.model';\r\nimport {catchError, map} from 'rxjs/operators';\r\n\r\n@Injectable({\r\n    providedIn: 'root'\r\n})\r\n\r\n// hoặc dùng đường dẫn ở file eviroment.apiUrl\r\n// ở dưới đang chỉ thẳng đến nhanh hơn,\r\n// const DOMAIN = environment.apiUrl; // ko dùng = cách này\r\n\r\nexport class QuanlyService extends TableService<QuanlyModel> implements OnDestroy {\r\n\r\n    // @ts-ignore\r\n    constructor(public http: HttpClient) {\r\n        super(http);\r\n    }\r\n\r\n    token = 'eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJzeXNhZG1pbkB0aGluZ3Nib2FyZC5vcmciLCJzY29wZXMiOlsiU1lTX0FETUlOIl0sInVzZXJJZCI6ImRkOWM5ZmMwLTU3NjctMTFlYy1hMTQxLWExZjM4MTFhMjQ2ZCIsImZpcnN0TmFtZSI6IiIsImxhc3ROYW1lIjoiU1lTVEVNIEFETUlOIiwiZW5hYmxlZCI6dHJ1ZSwiaXNQdWJsaWMiOmZhbHNlLCJ0ZW5hbnRJZCI6IjEzODE0MDAwLTFkZDItMTFiMi04MDgwLTgwODA4MDgwODA4MCIsImN1c3RvbWVySWQiOiIxMzgxNDAwMC0xZGQyLTExYjItODA4MC04MDgwODA4MDgwODAiLCJpc3MiOiJ0aGluZ3Nib2FyZC5pbyIsImlhdCI6MTY0OTkyMTIyNywiZXhwIjoxNjQ5OTMwMjI3fQ.P3L_W90ivg4Vv42m2CP7LMTttWhZCl95hWyIBxaTgDjS_ph1V1HyyU_1phXLjp2kTEGFGkUShTJYwXcGtlxyow';\r\n\r\n    apiCommon = 'http://123.30.214.139:17104/api/mange/group-service';\r\n\r\n    // Phân trang\r\n    public getPage(tableState: ITableState): Observable<TableResponseModel<QuanlyModel>> {\r\n        let headers = new HttpHeaders();\r\n        headers = headers.set('Authorization', `Bearer ${this.token}`);\r\n        const url = `${this.apiCommon}?${this.getQuery(tableState)}`;\r\n        console.log(url);\r\n        // @ts-ignore\r\n        return this.http.get<PageData<QuanlyModel>>(url, {headers}).pipe(\r\n            map((resp: PageData<QuanlyModel>) => {\r\n                const result: TableResponseModel<QuanlyModel> = {\r\n                    items: resp.data,\r\n                    total: resp.totalElements\r\n                };\r\n                return result;\r\n            }),\r\n            catchError(err => {\r\n                console.error('ERROR', err);\r\n                return err;\r\n            })\r\n        );\r\n    }\r\n\r\n    // custom find\r\n    find(tableState: ITableState): Observable<TableResponseModel<QuanlyModel>> {\r\n        let headers = new HttpHeaders();\r\n        headers = headers.set('Authorization', `Bearer ${this.token}`);\r\n\r\n        const url = `${this.API_URL}${this.getQuery(tableState)}`;\r\n        return this.http.get<any>(url, {headers}).pipe(\r\n            map((res) => {\r\n                const result: TableResponseModel<QuanlyModel> = {\r\n                    items: res.data,\r\n                    total: res.totalElements\r\n                };\r\n                return result;\r\n            }),\r\n            catchError(err => {\r\n                console.error('FIND ITEMS', err);\r\n                return of({items: [], total: 0});\r\n            })\r\n        );\r\n    }\r\n\r\n    // creatManage(id: any): Observable<QuanlyModel> {\r\n    //     let headers = new HttpHeaders();\r\n    //     headers = headers.set('Authorization', `Bearer ${this.token}`);\r\n    //     // @ts-ignore\r\n    //     return this.http.post<any>(`${this.apiCommon}`, {headers});\r\n    // }\r\n\r\n    creatManage(data: QuanlyModel): Observable<QuanlyModel> {\r\n        let headers = new HttpHeaders();\r\n        headers = headers.set('Authorization', `Bearer ${this.token}`);\r\n        // @ts-ignore\r\n        // return this.http.post<QuanlyModel>(`${this.apiCommon}`, data, {headers});\r\n        return this.http.post(`${this.apiCommon}`, data, {headers});\r\n    }\r\n\r\n    // updateManage(id: any): Observable<QuanlyModel> {\r\n    //     let headers = new HttpHeaders();\r\n    //     headers = headers.set('Authorization', `Bearer ${this.token}`);\r\n    //     // @ts-ignore\r\n    //     return this.http.put<QuanlyModel>(`${this.apiCommon}/${id}`, {headers});\r\n    // }\r\n\r\n    updateManage(quanlyModel: QuanlyModel): Observable<QuanlyModel> {\r\n        let headers = new HttpHeaders();\r\n        headers = headers.set('Authorization', `Bearer ${this.token}`);\r\n        // @ts-ignore\r\n        return this.http.put(`${this.apiCommon}/${quanlyModel.id}`, quanlyModel, {headers});\r\n    }\r\n\r\n    deleteManage(id: any): Observable<QuanlyModel> {\r\n        let headers = new HttpHeaders();\r\n        headers = headers.set('Authorization', `Bearer ${this.token}`);\r\n        // @ts-ignore\r\n        return this.http.delete<QuanlyModel>(`${this.apiCommon}/${id}`, {headers});\r\n    }\r\n\r\n    getById(id: any): Observable<QuanlyModel> {\r\n        let headers = new HttpHeaders();\r\n        headers = headers.set('Authorization', `Bearer ${this.token}`);\r\n        // @ts-ignore\r\n        return this.http.get<QuanlyModel>(`${this.apiCommon}/${id}`, {headers});\r\n    }\r\n\r\n    // lấy tất cả\r\n    public getAll(): Observable<QuanlyModel[]> {\r\n        let headers = new HttpHeaders();\r\n        headers = headers.set('Authorization', `Bearer ${this.token}`);\r\n        // @ts-ignore\r\n        return this.http.get<any>(this.apiCommon + '/all', {headers});\r\n    }\r\n\r\n    // lấy All Max Day Storage\r\n    public getAllMaxDayStorage(): Observable<any> {\r\n        let headers = new HttpHeaders();\r\n        headers = headers.set('Authorization', `Bearer ${this.token}`);\r\n        // @ts-ignore\r\n        return this.http.get<any>(this.apiCommon + '/max-day-storage', {headers});\r\n    }\r\n\r\n    handleError(err) {\r\n        if (err.error instanceof Error) {\r\n            console.log(`Client-side error: ${err.error.message}`);\r\n        } else {\r\n            console.log(`Sever-side error: ${err.status} - ${err.error}`);\r\n        }\r\n    }\r\n\r\n    ngOnDestroy(): void {\r\n        this.subscriptions.forEach(sb => sb.unsubscribe());\r\n    }\r\n}\r\n\r\n\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/demo1/src/app/pages/quanly/_service/quanly.service.ts b/demo1/src/app/pages/quanly/_service/quanly.service.ts
+--- a/demo1/src/app/pages/quanly/_service/quanly.service.ts	
++++ b/demo1/src/app/pages/quanly/_service/quanly.service.ts	
+@@ -21,7 +21,7 @@
+         super(http);
+     }
+ 
+-    token = 'eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJzeXNhZG1pbkB0aGluZ3Nib2FyZC5vcmciLCJzY29wZXMiOlsiU1lTX0FETUlOIl0sInVzZXJJZCI6ImRkOWM5ZmMwLTU3NjctMTFlYy1hMTQxLWExZjM4MTFhMjQ2ZCIsImZpcnN0TmFtZSI6IiIsImxhc3ROYW1lIjoiU1lTVEVNIEFETUlOIiwiZW5hYmxlZCI6dHJ1ZSwiaXNQdWJsaWMiOmZhbHNlLCJ0ZW5hbnRJZCI6IjEzODE0MDAwLTFkZDItMTFiMi04MDgwLTgwODA4MDgwODA4MCIsImN1c3RvbWVySWQiOiIxMzgxNDAwMC0xZGQyLTExYjItODA4MC04MDgwODA4MDgwODAiLCJpc3MiOiJ0aGluZ3Nib2FyZC5pbyIsImlhdCI6MTY0OTkyMTIyNywiZXhwIjoxNjQ5OTMwMjI3fQ.P3L_W90ivg4Vv42m2CP7LMTttWhZCl95hWyIBxaTgDjS_ph1V1HyyU_1phXLjp2kTEGFGkUShTJYwXcGtlxyow';
++    token = 'eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJzeXNhZG1pbkB0aGluZ3Nib2FyZC5vcmciLCJzY29wZXMiOlsiU1lTX0FETUlOIl0sInVzZXJJZCI6ImRkOWM5ZmMwLTU3NjctMTFlYy1hMTQxLWExZjM4MTFhMjQ2ZCIsImZpcnN0TmFtZSI6IiIsImxhc3ROYW1lIjoiU1lTVEVNIEFETUlOIiwiZW5hYmxlZCI6dHJ1ZSwiaXNQdWJsaWMiOmZhbHNlLCJ0ZW5hbnRJZCI6IjEzODE0MDAwLTFkZDItMTFiMi04MDgwLTgwODA4MDgwODA4MCIsImN1c3RvbWVySWQiOiIxMzgxNDAwMC0xZGQyLTExYjItODA4MC04MDgwODA4MDgwODAiLCJpc3MiOiJ0aGluZ3Nib2FyZC5pbyIsImlhdCI6MTY0OTk0NTEyOSwiZXhwIjoxNjQ5OTU0MTI5fQ.VTT9KDVsBgb8fG5FNotfOvfGbHvaYIXHeAB7-y409o8TUX0b5oZfZ4FVA_tqFnpKCsFqhPA79j7tFFy-zKnG9w';
+ 
+     apiCommon = 'http://123.30.214.139:17104/api/mange/group-service';
+ 
+Index: .idea/workspace.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project version=\"4\">\r\n  <component name=\"ChangeListManager\">\r\n    <list default=\"true\" id=\"74c529c5-5418-45ed-b028-94ea97472d2b\" name=\"Changes\" comment=\"Fix-bug 1: Update chưa xong 1\">\r\n      <change beforePath=\"$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml\" beforeDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/.idea/workspace.xml\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/.idea/workspace.xml\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/demo1/src/app/_metronic/shared/crud-table/services/table.service.ts\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/demo1/src/app/_metronic/shared/crud-table/services/table.service.ts\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/demo1/src/app/pages/quanly/_service/quanly.service.ts\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/demo1/src/app/pages/quanly/_service/quanly.service.ts\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/demo1/src/app/pages/quanly/create-udate/create-udate.component.html\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/demo1/src/app/pages/quanly/create-udate/create-udate.component.html\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/demo1/src/app/pages/quanly/create-udate/create-udate.component.ts\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/demo1/src/app/pages/quanly/create-udate/create-udate.component.ts\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/demo1/src/app/pages/quanly/quanly.component.html\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/demo1/src/app/pages/quanly/quanly.component.html\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/demo1/src/app/pages/quanly/quanly.component.ts\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/demo1/src/app/pages/quanly/quanly.component.ts\" afterDir=\"false\" />\r\n    </list>\r\n    <option name=\"SHOW_DIALOG\" value=\"false\" />\r\n    <option name=\"HIGHLIGHT_CONFLICTS\" value=\"true\" />\r\n    <option name=\"HIGHLIGHT_NON_ACTIVE_CHANGELIST\" value=\"false\" />\r\n    <option name=\"LAST_RESOLUTION\" value=\"IGNORE\" />\r\n  </component>\r\n  <component name=\"Git.Settings\">\r\n    <option name=\"RECENT_BRANCH_BY_REPOSITORY\">\r\n      <map>\r\n        <entry key=\"$PROJECT_DIR$\" value=\"day2-giaodien\" />\r\n      </map>\r\n    </option>\r\n    <option name=\"RECENT_GIT_ROOT_PATH\" value=\"$PROJECT_DIR$\" />\r\n  </component>\r\n  <component name=\"GitSEFilterConfiguration\">\r\n    <file-type-list>\r\n      <filtered-out-file-type name=\"LOCAL_BRANCH\" />\r\n      <filtered-out-file-type name=\"REMOTE_BRANCH\" />\r\n      <filtered-out-file-type name=\"TAG\" />\r\n      <filtered-out-file-type name=\"COMMIT_BY_MESSAGE\" />\r\n    </file-type-list>\r\n  </component>\r\n  <component name=\"ProjectId\" id=\"27P9K09AMNwjiflDmA3TXesdiux\" />\r\n  <component name=\"ProjectViewState\">\r\n    <option name=\"hideEmptyMiddlePackages\" value=\"true\" />\r\n    <option name=\"showLibraryContents\" value=\"true\" />\r\n  </component>\r\n  <component name=\"PropertiesComponent\">\r\n    <property name=\"RunOnceActivity.OpenProjectViewOnStart\" value=\"true\" />\r\n    <property name=\"RunOnceActivity.ShowReadmeOnStart\" value=\"true\" />\r\n    <property name=\"WebServerToolWindowFactoryState\" value=\"false\" />\r\n    <property name=\"last_opened_file_path\" value=\"T:/DemoCrud\" />\r\n    <property name=\"node.js.detected.package.tslint\" value=\"true\" />\r\n    <property name=\"node.js.selected.package.tslint\" value=\"(autodetect)\" />\r\n    <property name=\"nodejs_package_manager_path\" value=\"yarn\" />\r\n    <property name=\"settings.editor.selected.configurable\" value=\"MTHome\" />\r\n    <property name=\"ts.external.directory.path\" value=\"C:\\Users\\OS\\Desktop\\Demo-metronic-crud\\demo1\\node_modules\\typescript\\lib\" />\r\n  </component>\r\n  <component name=\"SpellCheckerSettings\" RuntimeDictionaries=\"0\" Folders=\"0\" CustomDictionaries=\"0\" DefaultDictionary=\"application-level\" UseSingleDictionary=\"true\" transferred=\"true\" />\r\n  <component name=\"TaskManager\">\r\n    <task active=\"true\" id=\"Default\" summary=\"Default task\">\r\n      <changelist id=\"74c529c5-5418-45ed-b028-94ea97472d2b\" name=\"Changes\" comment=\"\" />\r\n      <created>1649210786403</created>\r\n      <option name=\"number\" value=\"Default\" />\r\n      <option name=\"presentableId\" value=\"Default\" />\r\n      <updated>1649210786403</updated>\r\n      <workItem from=\"1649210788068\" duration=\"15000\" />\r\n      <workItem from=\"1649210812823\" duration=\"26325000\" />\r\n      <workItem from=\"1649252345861\" duration=\"8804000\" />\r\n      <workItem from=\"1649297081950\" duration=\"9106000\" />\r\n      <workItem from=\"1649312734296\" duration=\"12629000\" />\r\n      <workItem from=\"1649340960550\" duration=\"11881000\" />\r\n      <workItem from=\"1649380687684\" duration=\"13284000\" />\r\n      <workItem from=\"1649399581562\" duration=\"13825000\" />\r\n      <workItem from=\"1649437235615\" duration=\"1497000\" />\r\n      <workItem from=\"1649677474348\" duration=\"1490000\" />\r\n      <workItem from=\"1649685966240\" duration=\"440000\" />\r\n      <workItem from=\"1649726053511\" duration=\"25349000\" />\r\n      <workItem from=\"1649756928445\" duration=\"1812000\" />\r\n      <workItem from=\"1649815219699\" duration=\"2498000\" />\r\n      <workItem from=\"1649831910837\" duration=\"5698000\" />\r\n      <workItem from=\"1649839512647\" duration=\"7029000\" />\r\n      <workItem from=\"1649848649709\" duration=\"4794000\" />\r\n      <workItem from=\"1649860041483\" duration=\"7989000\" />\r\n      <workItem from=\"1649898746076\" duration=\"6711000\" />\r\n      <workItem from=\"1649906213676\" duration=\"12233000\" />\r\n    </task>\r\n    <task id=\"LOCAL-00001\" summary=\"all file\">\r\n      <created>1649385057643</created>\r\n      <option name=\"number\" value=\"00001\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00001\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1649385057644</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00002\" summary=\"all file\">\r\n      <created>1649385462641</created>\r\n      <option name=\"number\" value=\"00002\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00002\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1649385462641</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00003\" summary=\"gitinor - workspace.xml\">\r\n      <created>1649385699709</created>\r\n      <option name=\"number\" value=\"00003\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00003\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1649385699709</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00004\" summary=\"all fileaaa\">\r\n      <created>1649386029811</created>\r\n      <option name=\"number\" value=\"00004\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00004\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1649386029811</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00005\" summary=\"file mơi\">\r\n      <created>1649734001725</created>\r\n      <option name=\"number\" value=\"00005\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00005\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1649734001726</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00006\" summary=\"Thêm mới ok\">\r\n      <created>1649756559608</created>\r\n      <option name=\"number\" value=\"00006\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00006\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1649756559608</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00007\" summary=\"Fix-bug 1: Update\">\r\n      <created>1649841385947</created>\r\n      <option name=\"number\" value=\"00007\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00007\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1649841385947</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00008\" summary=\"Fix-bug 1: Update chưa xong\">\r\n      <created>1649845509310</created>\r\n      <option name=\"number\" value=\"00008\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00008\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1649845509310</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00009\" summary=\"Fix-bug 1: Update chưa xong 1\">\r\n      <created>1649846599226</created>\r\n      <option name=\"number\" value=\"00009\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00009\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1649846599226</updated>\r\n    </task>\r\n    <option name=\"localTasksCounter\" value=\"10\" />\r\n    <servers />\r\n  </component>\r\n  <component name=\"TypeScriptGeneratedFilesManager\">\r\n    <option name=\"version\" value=\"3\" />\r\n  </component>\r\n  <component name=\"Vcs.Log.Tabs.Properties\">\r\n    <option name=\"TAB_STATES\">\r\n      <map>\r\n        <entry key=\"MAIN\">\r\n          <value>\r\n            <State />\r\n          </value>\r\n        </entry>\r\n      </map>\r\n    </option>\r\n    <option name=\"oldMeFiltersMigrated\" value=\"true\" />\r\n  </component>\r\n  <component name=\"VcsManagerConfiguration\">\r\n    <MESSAGE value=\"all file\" />\r\n    <MESSAGE value=\"gitinor - workspace.xml\" />\r\n    <MESSAGE value=\"all fileaaa\" />\r\n    <MESSAGE value=\"file mơi\" />\r\n    <MESSAGE value=\"form update\" />\r\n    <MESSAGE value=\"Thêm mới ok\" />\r\n    <MESSAGE value=\"Fix-bug 1: Update\" />\r\n    <MESSAGE value=\"Fix-bug 1: Update chưa xong\" />\r\n    <MESSAGE value=\"Fix-bug 1: Update chưa xong 1\" />\r\n    <option name=\"LAST_COMMIT_MESSAGE\" value=\"Fix-bug 1: Update chưa xong 1\" />\r\n  </component>\r\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/workspace.xml b/.idea/workspace.xml
+--- a/.idea/workspace.xml	
++++ b/.idea/workspace.xml	
+@@ -1,15 +1,12 @@
+ <?xml version="1.0" encoding="UTF-8"?>
+ <project version="4">
+   <component name="ChangeListManager">
+-    <list default="true" id="74c529c5-5418-45ed-b028-94ea97472d2b" name="Changes" comment="Fix-bug 1: Update chưa xong 1">
+-      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" />
++    <list default="true" id="74c529c5-5418-45ed-b028-94ea97472d2b" name="Changes" comment="Create ok&#10;Update Failed">
+       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+       <change beforePath="$PROJECT_DIR$/demo1/src/app/_metronic/shared/crud-table/services/table.service.ts" beforeDir="false" afterPath="$PROJECT_DIR$/demo1/src/app/_metronic/shared/crud-table/services/table.service.ts" afterDir="false" />
+       <change beforePath="$PROJECT_DIR$/demo1/src/app/pages/quanly/_service/quanly.service.ts" beforeDir="false" afterPath="$PROJECT_DIR$/demo1/src/app/pages/quanly/_service/quanly.service.ts" afterDir="false" />
+       <change beforePath="$PROJECT_DIR$/demo1/src/app/pages/quanly/create-udate/create-udate.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/demo1/src/app/pages/quanly/create-udate/create-udate.component.html" afterDir="false" />
+       <change beforePath="$PROJECT_DIR$/demo1/src/app/pages/quanly/create-udate/create-udate.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/demo1/src/app/pages/quanly/create-udate/create-udate.component.ts" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/demo1/src/app/pages/quanly/quanly.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/demo1/src/app/pages/quanly/quanly.component.html" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/demo1/src/app/pages/quanly/quanly.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/demo1/src/app/pages/quanly/quanly.component.ts" afterDir="false" />
+     </list>
+     <option name="SHOW_DIALOG" value="false" />
+     <option name="HIGHLIGHT_CONFLICTS" value="true" />
+@@ -19,7 +16,7 @@
+   <component name="Git.Settings">
+     <option name="RECENT_BRANCH_BY_REPOSITORY">
+       <map>
+-        <entry key="$PROJECT_DIR$" value="day2-giaodien" />
++        <entry key="$PROJECT_DIR$" value="day3-fixbug" />
+       </map>
+     </option>
+     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+@@ -75,7 +72,8 @@
+       <workItem from="1649848649709" duration="4794000" />
+       <workItem from="1649860041483" duration="7989000" />
+       <workItem from="1649898746076" duration="6711000" />
+-      <workItem from="1649906213676" duration="12233000" />
++      <workItem from="1649906213676" duration="20867000" />
++      <workItem from="1649944948842" duration="2091000" />
+     </task>
+     <task id="LOCAL-00001" summary="all file">
+       <created>1649385057643</created>
+@@ -140,7 +138,14 @@
+       <option name="project" value="LOCAL" />
+       <updated>1649846599226</updated>
+     </task>
+-    <option name="localTasksCounter" value="10" />
++    <task id="LOCAL-00010" summary="Create ok&#10;Update Failed">
++      <created>1649925488026</created>
++      <option name="number" value="00010" />
++      <option name="presentableId" value="LOCAL-00010" />
++      <option name="project" value="LOCAL" />
++      <updated>1649925488026</updated>
++    </task>
++    <option name="localTasksCounter" value="11" />
+     <servers />
+   </component>
+   <component name="TypeScriptGeneratedFilesManager">
+@@ -168,6 +173,7 @@
+     <MESSAGE value="Fix-bug 1: Update" />
+     <MESSAGE value="Fix-bug 1: Update chưa xong" />
+     <MESSAGE value="Fix-bug 1: Update chưa xong 1" />
+-    <option name="LAST_COMMIT_MESSAGE" value="Fix-bug 1: Update chưa xong 1" />
++    <MESSAGE value="Create ok&#10;Update Failed" />
++    <option name="LAST_COMMIT_MESSAGE" value="Create ok&#10;Update Failed" />
+   </component>
+ </project>
+\ No newline at end of file
